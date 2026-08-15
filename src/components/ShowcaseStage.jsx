@@ -12,7 +12,7 @@ const LIGHTING_MODES = [
   { id: 'sunset', label: 'Warm Octane', color: 'rgba(255, 159, 10, 0.25)' },
 ];
 
-export default function ShowcaseStage({ items, onSelectCar, onToggleFavorite }) {
+export default function ShowcaseStage({ items, onSelectCar, onToggleFavorite, showPrices = true }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lightingMode, setLightingMode] = useState('studio');
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -35,7 +35,7 @@ export default function ShowcaseStage({ items, onSelectCar, onToggleFavorite }) 
   const handleMouseMove = (e) => {
     if (!stageRef.current) return;
     const rect = stageRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20; // -10 to +10 deg
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
     const y = ((e.clientY - rect.top) / rect.height - 0.5) * -20;
     setMousePos({ x, y });
   };
@@ -126,7 +126,6 @@ export default function ShowcaseStage({ items, onSelectCar, onToggleFavorite }) 
               alt={currentCar.casting_name} 
               className="stage-car-image"
             />
-            {/* Pedestal Acrylic Reflection */}
             <div className="stage-pedestal-mirror" />
           </div>
 
@@ -163,21 +162,27 @@ export default function ShowcaseStage({ items, onSelectCar, onToggleFavorite }) 
               </div>
             )}
 
-            {/* Price & Valuation HUD */}
-            <div className="stage-hud-price-row">
-              <div>
-                <div className="price-title">Paid Cost</div>
-                <div className="price-amount" style={{ fontSize: '1.15rem' }}>{formatVND(currentCar.purchase_price)}</div>
-              </div>
+            {/* Price & Valuation HUD (if permitted) */}
+            {showPrices ? (
+              <div className="stage-hud-price-row">
+                <div>
+                  <div className="price-title">Paid Cost</div>
+                  <div className="price-amount" style={{ fontSize: '1.15rem' }}>{formatVND(currentCar.purchase_price)}</div>
+                </div>
 
-              <div style={{ textAlign: 'right' }}>
-                <div className="price-title">Est. Valuation</div>
-                <div className="price-amount highlight" style={{ fontSize: '1.25rem' }}>{formatVND(currentCar.current_value)}</div>
-                <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600 }}>
-                  {isPositive ? '+' : ''}{profitPct}% ({isPositive ? '+' : ''}{formatVND(profit)})
+                <div style={{ textAlign: 'right' }}>
+                  <div className="price-title">Est. Valuation</div>
+                  <div className="price-amount highlight" style={{ fontSize: '1.25rem' }}>{formatVND(currentCar.current_value)}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600 }}>
+                    {isPositive ? '+' : ''}{profitPct}% ({isPositive ? '+' : ''}{formatVND(profit)})
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div style={{ padding: '0.85rem', background: 'rgba(255, 255, 255, 0.04)', borderRadius: 'var(--radius-md)', border: 'var(--glass-border)', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                <strong>Condition:</strong> {currentCar.condition} • <strong>Category:</strong> {currentCar.era || 'Motorsport'}
+              </div>
+            )}
 
             {/* Quick Action Button */}
             <button 

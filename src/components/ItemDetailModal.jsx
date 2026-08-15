@@ -3,7 +3,16 @@ import { X, Star, Edit3, Trash2, Tag, TrendingUp, HelpCircle, ShieldCheck, ZoomI
 import { formatVND } from '../services/api';
 import { sound } from '../services/soundEffects';
 
-export default function ItemDetailModal({ item, onClose, onEdit, onDelete, onToggleFavorite, onOpenValuationInfo }) {
+export default function ItemDetailModal({ 
+  item, 
+  onClose, 
+  onEdit, 
+  onDelete, 
+  onToggleFavorite, 
+  onOpenValuationInfo,
+  isAdmin = true,
+  showPrices = true
+}) {
   if (!item) return null;
 
   const allPhotos = [
@@ -140,71 +149,72 @@ export default function ItemDetailModal({ item, onClose, onEdit, onDelete, onTog
               )}
             </div>
 
-            {/* Right: Specifications & Valuation Intelligence */}
+            {/* Right: Specifications & Intelligence */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {/* Valuation Intelligence Card */}
-              <div 
-                style={{ 
-                  background: 'rgba(255, 255, 255, 0.05)', 
-                  border: '1px solid rgba(52, 211, 153, 0.35)', 
-                  borderRadius: 'var(--radius-lg)', 
-                  padding: '1.25rem',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), var(--glass-specular)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.85rem'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div className="price-title">Paid Cost</div>
-                    <div className="price-amount" style={{ fontSize: '1.25rem', marginTop: '0.2rem' }}>
-                      {formatVND(item.purchase_price)}
-                    </div>
-                  </div>
-
-                  <div style={{ textAlign: 'right' }}>
-                    <div className="price-title">Est. Market Value</div>
-                    <div className="price-amount highlight" style={{ fontSize: '1.35rem', marginTop: '0.2rem' }}>
-                      {formatVND(item.current_value)}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--glass-border)', fontSize: '0.8125rem' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Net Capital Gain:</span>
-                  <span className={`gain-badge ${isPositive ? 'positive' : 'negative'}`}>
-                    {isPositive ? '+' : ''}{profitPct}% ({isPositive ? '+' : ''}{formatVND(profit)})
-                  </span>
-                </div>
-
-                {/* Valuation Source Pill */}
+              {/* Valuation Intelligence Card (Shown only if permitted) */}
+              {showPrices && (
                 <div 
-                  onClick={() => {
-                    sound.playTap();
-                    onOpenValuationInfo();
-                  }}
                   style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'space-between',
-                    background: 'rgba(52, 211, 153, 0.12)',
-                    border: '1px solid rgba(52, 211, 153, 0.3)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '0.45rem 0.75rem',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                    color: '#34d399'
+                    background: 'rgba(255, 255, 255, 0.05)', 
+                    border: '1px solid rgba(52, 211, 153, 0.35)', 
+                    borderRadius: 'var(--radius-lg)', 
+                    padding: '1.25rem',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), var(--glass-specular)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.85rem'
                   }}
-                  title="Click to learn how valuation comps are calculated"
                 >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <ShieldCheck size={14} />
-                    <strong>Valuation Source:</strong> {item.valuation_source || 'Market Comps (eBay / Auctions)'}
-                  </span>
-                  <HelpCircle size={14} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div className="price-title">Paid Cost</div>
+                      <div className="price-amount" style={{ fontSize: '1.25rem', marginTop: '0.2rem' }}>
+                        {formatVND(item.purchase_price)}
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <div className="price-title">Est. Market Value</div>
+                      <div className="price-amount highlight" style={{ fontSize: '1.35rem', marginTop: '0.2rem' }}>
+                        {formatVND(item.current_value)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--glass-border)', fontSize: '0.8125rem' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Net Capital Gain:</span>
+                    <span className={`gain-badge ${isPositive ? 'positive' : 'negative'}`}>
+                      {isPositive ? '+' : ''}{profitPct}% ({isPositive ? '+' : ''}{formatVND(profit)})
+                    </span>
+                  </div>
+
+                  <div 
+                    onClick={() => {
+                      sound.playTap();
+                      onOpenValuationInfo();
+                    }}
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between',
+                      background: 'rgba(52, 211, 153, 0.12)',
+                      border: '1px solid rgba(52, 211, 153, 0.3)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.45rem 0.75rem',
+                      cursor: 'pointer',
+                      fontSize: '0.75rem',
+                      color: '#34d399'
+                    }}
+                    title="Click to learn how valuation comps are calculated"
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <ShieldCheck size={14} />
+                      <strong>Valuation Source:</strong> {item.valuation_source || 'Market Comps (eBay / Auctions)'}
+                    </span>
+                    <HelpCircle size={14} />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* iOS Inset Specs Table */}
               <div style={{ background: 'rgba(255, 255, 255, 0.04)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '0.25rem 1.15rem', boxShadow: 'var(--glass-specular)' }}>
@@ -241,35 +251,43 @@ export default function ItemDetailModal({ item, onClose, onEdit, onDelete, onTog
                 </div>
               )}
 
-              {/* Action Bar */}
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '1rem' }}>
-                <button 
-                  className="btn btn-secondary" 
-                  style={{ flex: 1 }}
-                  onClick={() => {
-                    sound.playTap();
-                    onClose();
-                    onEdit(item);
-                  }}
-                >
-                  <Edit3 size={15} />
-                  <span>Edit Details</span>
-                </button>
-
-                <button 
-                  className="btn btn-secondary" 
-                  style={{ color: 'var(--apple-red)' }}
-                  onClick={() => {
-                    if (window.confirm(`Delete ${item.casting_name} from vault?`)) {
-                      onDelete(item);
+              {/* Action Bar (Only visible to Admin) */}
+              {isAdmin ? (
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '1rem' }}>
+                  <button 
+                    className="btn btn-secondary" 
+                    style={{ flex: 1 }}
+                    onClick={() => {
+                      sound.playTap();
                       onClose();
-                    }
-                  }}
-                >
-                  <Trash2 size={15} />
-                  <span>Delete</span>
-                </button>
-              </div>
+                      onEdit(item);
+                    }}
+                  >
+                    <Edit3 size={15} />
+                    <span>Edit Details</span>
+                  </button>
+
+                  <button 
+                    className="btn btn-secondary" 
+                    style={{ color: 'var(--apple-red)' }}
+                    onClick={() => {
+                      if (window.confirm(`Delete ${item.casting_name} from vault?`)) {
+                        onDelete(item);
+                        onClose();
+                      }
+                    }}
+                  >
+                    <Trash2 size={15} />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'auto', paddingTop: '1rem' }}>
+                  <button className="btn btn-secondary" onClick={onClose}>
+                    Close Spectator View
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

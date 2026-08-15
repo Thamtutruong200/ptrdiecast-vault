@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { api } from './services/api';
 import { sound } from './services/soundEffects';
+import { auth } from './services/auth';
 import { useDeviceDetect } from './hooks/useDeviceDetect';
 import Navbar from './components/Navbar';
 import StatsHeader from './components/StatsHeader';
@@ -17,6 +18,8 @@ import DuplicateModal from './components/DuplicateModal';
 import ExportImportModal from './components/ExportImportModal';
 import ValuationInfoModal from './components/ValuationInfoModal';
 import AnalyticsModal from './components/AnalyticsModal';
+import AdminLoginModal from './components/AdminLoginModal';
+import AdminConsoleModal from './components/AdminConsoleModal';
 import ptrLogo from './assets/ptr-logo.png';
 
 export default function App() {
@@ -24,6 +27,11 @@ export default function App() {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSupabaseConnected, setIsSupabaseConnected] = useState(false);
+
+  // Admin & Spectator Console State
+  const [isAdmin, setIsAdmin] = useState(auth.isAdmin());
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isAdminConsoleOpen, setIsAdminConsoleOpen] = useState(false);
 
   // View Mode: 'grid' (Gallery 4-col), 'showcase' (3D Studio), 'list' (macOS Table)
   const [viewMode, setViewMode] = useState('grid');
@@ -65,10 +73,11 @@ export default function App() {
     }, 3500);
   };
 
+  const showPrices = isAdmin || !auth.hidePricesInSpectator();
+
   // Keyboard Shortcuts (Apple Pro UX)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't trigger shortcuts if user is typing in an input
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
         return;
       }
@@ -80,10 +89,12 @@ export default function App() {
         e.preventDefault();
         searchInputRef.current?.focus();
       } else if (e.key === 'n' || e.key === 'N') {
-        e.preventDefault();
-        sound.playSheetOpen();
-        setEditingItem(null);
-        setIsAddModalOpen(true);
+        if (isAdmin) {
+          e.preventDefault();
+          sound.playSheetOpen();
+          setEditingItem(null);
+          setIsAddModalOpen(true);
+        }
       } else if (e.key === '1') {
         sound.playTap();
         setViewMode('grid');
@@ -98,7 +109,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isAdmin]);
 
   // Load items and stats
   const loadData = useCallback(async () => {
@@ -210,6 +221,15 @@ export default function App() {
             sound.playSheetOpen();
             setIsAnalyticsOpen(true);
           }}
+          onOpenAdminConsole={() => {
+            sound.playSheetOpen();
+            setIsAdminConsoleOpen(true);
+          }}
+          onOpenAdminLogin={() => {
+            sound.playSheetOpen();
+            setIsAdminLoginOpen(true);
+          }}
+          isAdmin={isAdmin}
           isSupabaseConnected={isSupabaseConnected}
           deviceMode={deviceMode}
           setDeviceMode={setDeviceMode}
@@ -218,17 +238,13 @@ export default function App() {
         />
 
         <main className="container">
-          {/* Liquid KPI Metric Cards with Vault Spotlight */}
+          {/* Liquid KPI Metric Cards (Cost & Value removed for clean 3-card layout) */}
           <StatsHeader 
             stats={stats} 
             items={items}
             onSelectCar={(it) => {
               sound.playSheetOpen();
               setSelectedItem(it);
-            }}
-            onOpenValuationInfo={() => {
-              sound.playSheetOpen();
-              setIsValuationInfoOpen(true);
             }}
           />
 
@@ -259,6 +275,7 @@ export default function App() {
                   setSelectedItem(it);
                 }}
                 onToggleFavorite={handleToggleFavorite}
+                showPrices={showPrices}
               />
             ) : viewMode === 'list' ? (
               /* View 2: macOS Finder Compact Table List */
@@ -275,6 +292,8 @@ export default function App() {
                 }}
                 onDelete={handleDeleteItem}
                 onToggleFavorite={handleToggleFavorite}
+                isAdmin={isAdmin}
+                showPrices={showPrices}
               />
             ) : (
               /* View 3: 4 Cars Per Row Liquid Glass Gallery Grid */
@@ -287,13 +306,8 @@ export default function App() {
                       sound.playSheetOpen();
                       setSelectedItem(it);
                     }}
-                    onEdit={(it) => {
-                      sound.playSheetOpen();
-                      setEditingItem(it);
-                      setIsAddModalOpen(true);
-                    }}
-                    onDelete={handleDeleteItem}
                     onToggleFavorite={handleToggleFavorite}
+                    showPrices={showPrices}
                   />
                 ))}
               </div>
@@ -323,25 +337,27 @@ export default function App() {
                   Reset All Filters
                 </button>
               ) : (
-                <button 
-                  className="btn btn-primary"
-                  onClick={() => {
-                    sound.playSheetOpen();
-                    setEditingItem(null);
-                    setIsAddModalOpen(true);
-                  }}
-                  style={{ marginTop: '0.5rem' }}
-                >
-                  <Plus size={16} strokeWidth={2.5} />
-                  <span>Add First Model</span>
-                </button>
+                isAdmin && (
+                  <button 
+                    className="btn btn-primary"
+                    onClick={() => {
+                      sound.playSheetOpen();
+                      setEditingItem(null);
+                      setIsAddModalOpen(true);
+                    }}
+                    style={{ marginTop: '0.5rem' }}
+                  >
+                    <Plus size={16} strokeWidth={2.5} />
+                    <span>Add First Model</span>
+                  </button>
+                )
               )}
             </div>
           )}
         </main>
 
-        {/* Mobile Floating Action Button (FAB) */}
-        {isMobile && (
+        {/* Mobile Floating Action Button (Only for Admin) */}
+        {isMobile && isAdmin && (
           <button 
             type="button"
             className="mobile-fab"
@@ -369,6 +385,8 @@ export default function App() {
             onDelete={handleDeleteItem}
             onToggleFavorite={handleToggleFavorite}
             onOpenValuationInfo={() => setIsValuationInfoOpen(true)}
+            isAdmin={isAdmin}
+            showPrices={showPrices}
           />
         )}
 
@@ -425,6 +443,35 @@ export default function App() {
               sound.playSheetOpen();
               setSelectedItem(it);
             }}
+          />
+        )}
+
+        {/* Admin Login PIN Modal */}
+        {isAdminLoginOpen && (
+          <AdminLoginModal 
+            onClose={() => setIsAdminLoginOpen(false)}
+            onLoginSuccess={() => {
+              setIsAdmin(true);
+              addToast('Admin Console Unlocked', 'success');
+            }}
+          />
+        )}
+
+        {/* Admin Console Sheet Modal */}
+        {isAdminConsoleOpen && (
+          <AdminConsoleModal 
+            onClose={() => setIsAdminConsoleOpen(false)}
+            onSwitchToSpectator={() => {
+              auth.logout();
+              setIsAdmin(false);
+              addToast('Switched to Public Spectator Mode', 'success');
+            }}
+            onOpenAdd={() => {
+              setEditingItem(null);
+              setIsAddModalOpen(true);
+            }}
+            onOpenSync={() => setIsExportImportOpen(true)}
+            onOpenAnalytics={() => setIsAnalyticsOpen(true)}
           />
         )}
 

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, ArrowDownToLine, Smartphone, Monitor, PieChart, Volume2, VolumeX, Sparkles } from 'lucide-react';
+import { 
+  Plus, ArrowDownToLine, Smartphone, Monitor, PieChart, Volume2, 
+  VolumeX, Shield, Lock, Eye, Sparkles 
+} from 'lucide-react';
 import { sound } from '../services/soundEffects';
 import ptrLogo from '../assets/ptr-logo.png';
 
@@ -8,6 +11,9 @@ export default function Navbar({
   onOpenAdd, 
   onOpenExportImport, 
   onOpenAnalytics,
+  onOpenAdminConsole,
+  onOpenAdminLogin,
+  isAdmin,
   isSupabaseConnected,
   deviceMode,
   setDeviceMode,
@@ -58,7 +64,29 @@ export default function Navbar({
 
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          {/* Audio Feedback Haptic Mute Toggle */}
+          {/* Admin / Spectator Console Switcher Pill */}
+          <button
+            type="button"
+            className={`device-toggle-pill ${isAdmin ? 'active-desktop' : ''}`}
+            onClick={() => {
+              sound.playSheetOpen();
+              if (isAdmin) {
+                onOpenAdminConsole();
+              } else {
+                onOpenAdminLogin();
+              }
+            }}
+            title={isAdmin ? 'Admin Console (Unlocked). Click to manage settings.' : 'Spectator Mode (Read-only). Click to unlock Admin.'}
+            style={{
+              borderColor: isAdmin ? 'rgba(52, 211, 153, 0.5)' : 'rgba(255, 255, 255, 0.15)',
+              color: isAdmin ? '#34d399' : 'var(--text-secondary)'
+            }}
+          >
+            {isAdmin ? <Shield size={13} color="#34d399" /> : <Eye size={13} />}
+            <span>{isAdmin ? 'Admin Console' : 'Spectator Mode'}</span>
+          </button>
+
+          {/* Sound FX Toggle */}
           <button 
             type="button"
             className="btn btn-secondary btn-icon"
@@ -69,21 +97,23 @@ export default function Navbar({
             {isMuted ? <VolumeX size={14} color="var(--text-tertiary)" /> : <Volume2 size={14} color="var(--apple-blue)" />}
           </button>
 
-          {/* Portfolio Analytics Button */}
-          <button 
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => {
-              sound.playSheetOpen();
-              onOpenAnalytics();
-            }}
-            title="Open Collection Financial & Brand Analytics"
-          >
-            <PieChart size={14} color="var(--apple-purple)" />
-            <span style={{ display: isRealMobile ? 'none' : 'inline' }}>Analytics</span>
-          </button>
+          {/* Portfolio Analytics (Visible to Admin or when permitted) */}
+          {isAdmin && (
+            <button 
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => {
+                sound.playSheetOpen();
+                onOpenAnalytics();
+              }}
+              title="Open Collection Financial & Brand Analytics"
+            >
+              <PieChart size={14} color="var(--apple-purple)" />
+              <span style={{ display: isRealMobile ? 'none' : 'inline' }}>Analytics</span>
+            </button>
+          )}
 
-          {/* Device Mode Switcher Capsule */}
+          {/* Device Switcher */}
           <button 
             type="button"
             className={`device-toggle-pill ${isMobile ? 'active-mobile' : 'active-desktop'}`}
@@ -91,10 +121,10 @@ export default function Navbar({
             title={`Active layout: ${getDeviceLabel()}. Click to toggle between Auto, Mobile, and Desktop.`}
           >
             {isMobile ? <Smartphone size={13} /> : <Monitor size={13} />}
-            <span>{getDeviceLabel()}</span>
+            <span style={{ display: isRealMobile ? 'none' : 'inline' }}>{getDeviceLabel()}</span>
           </button>
 
-          {/* Liquid Cloud Sync Status */}
+          {/* Cloud Sync Status */}
           <div className="status-pill" title={isSupabaseConnected ? 'Connected to Supabase PostgreSQL & Storage' : 'Local Storage Mode'}>
             <span className={`status-dot ${isSupabaseConnected ? 'connected' : 'local'}`} />
             <span style={{ display: isRealMobile ? 'none' : 'inline' }}>
@@ -102,30 +132,33 @@ export default function Navbar({
             </span>
           </div>
 
-          {/* Sync Button */}
-          <button 
-            className="btn btn-secondary btn-sm"
-            onClick={() => {
-              sound.playSheetOpen();
-              onOpenExportImport();
-            }}
-            title="Data Sync & Backup"
-          >
-            <ArrowDownToLine size={14} />
-            <span style={{ display: isRealMobile ? 'none' : 'inline' }}>Sync</span>
-          </button>
+          {/* Admin Operations: Sync and Add Model */}
+          {isAdmin && (
+            <>
+              <button 
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  sound.playSheetOpen();
+                  onOpenExportImport();
+                }}
+                title="Data Sync & Backup"
+              >
+                <ArrowDownToLine size={14} />
+                <span style={{ display: isRealMobile ? 'none' : 'inline' }}>Sync</span>
+              </button>
 
-          {/* Add Model Primary CTA */}
-          <button 
-            className="btn btn-primary btn-sm"
-            onClick={() => {
-              sound.playSheetOpen();
-              onOpenAdd();
-            }}
-          >
-            <Plus size={15} strokeWidth={2.5} />
-            <span>Add Model</span>
-          </button>
+              <button 
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  sound.playSheetOpen();
+                  onOpenAdd();
+                }}
+              >
+                <Plus size={15} strokeWidth={2.5} />
+                <span>Add Model</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>

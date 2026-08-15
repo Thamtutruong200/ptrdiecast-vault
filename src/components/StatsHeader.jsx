@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, CircleDollarSign, TrendingUp, Star, HelpCircle, Dices, Sparkles, Eye, ArrowRight } from 'lucide-react';
+import { Layers, Star, Dices, Sparkles, PieChart, ArrowRight } from 'lucide-react';
 import { formatVND } from '../services/api';
 
-export default function StatsHeader({ stats, items = [], onSelectCar, onOpenValuationInfo }) {
+export default function StatsHeader({ stats, items = [], onSelectCar }) {
   const [highlightCar, setHighlightCar] = useState(null);
   const [isShuffling, setIsShuffling] = useState(false);
 
   // Pick a random car on initial load or when items change
   useEffect(() => {
     if (items && items.length > 0) {
-      // Pick random item
       const randomIndex = Math.floor(Math.random() * items.length);
       setHighlightCar(items[randomIndex]);
     } else {
@@ -24,7 +23,6 @@ export default function StatsHeader({ stats, items = [], onSelectCar, onOpenValu
     setIsShuffling(true);
     setTimeout(() => {
       let nextIndex = Math.floor(Math.random() * items.length);
-      // Try to pick a different one if more than 1 item
       if (items.length > 1 && items[nextIndex]?.id === highlightCar?.id) {
         nextIndex = (nextIndex + 1) % items.length;
       }
@@ -35,82 +33,51 @@ export default function StatsHeader({ stats, items = [], onSelectCar, onOpenValu
 
   if (!stats) return null;
 
-  const profit = stats.total_profit || 0;
-  const isPositive = profit >= 0;
-  const profitPct = stats.profit_percentage || 0;
-
   const highlightPhoto = highlightCar?.photos && highlightCar.photos.length > 0
     ? highlightCar.photos[0]
     : 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=300&q=80';
 
+  const brandCount = Object.keys(stats.brand_breakdown || {}).length;
+
   return (
     <section className="stats-header">
-      <div className="stats-grid">
-        {/* Card 1: Total Vault */}
+      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        {/* Card 1: Total Vault Count */}
         <div className="stat-card">
           <div className="stat-top">
-            <span className="stat-label">Total Vault</span>
+            <span className="stat-label">Vault Collection</span>
             <div className="stat-icon-capsule">
               <Layers size={15} />
             </div>
           </div>
-          <div className="stat-number">{stats.total_count || 0}</div>
+          <div className="stat-number">{stats.total_count || 0} Models</div>
           <div className="stat-sub">
             <Star size={13} color="var(--apple-amber)" fill="var(--apple-amber)" />
-            <span>{stats.favorites_count || 0} starred models</span>
+            <span>{stats.favorites_count || 0} starred favorites</span>
           </div>
         </div>
 
-        {/* Card 2: Invested Capital */}
+        {/* Card 2: Vault Diversity & Scales */}
         <div className="stat-card">
           <div className="stat-top">
-            <span className="stat-label">Invested Cost</span>
-            <div className="stat-icon-capsule">
-              <CircleDollarSign size={15} />
+            <span className="stat-label">Portfolio Diversity</span>
+            <div className="stat-icon-capsule" style={{ color: 'var(--apple-purple)' }}>
+              <PieChart size={15} />
             </div>
           </div>
-          <div className="stat-number">{formatVND(stats.total_paid)}</div>
+          <div className="stat-number">{brandCount} Brands</div>
           <div className="stat-sub">
-            <span>Avg {formatVND(stats.total_count ? stats.total_paid / stats.total_count : 0)} / model</span>
-          </div>
-        </div>
-
-        {/* Card 3: Market Valuation & Intelligence Trigger */}
-        <div className="stat-card" style={{ border: '1px solid rgba(52, 211, 153, 0.35)' }}>
-          <div className="stat-top">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span className="stat-label">Est. Valuation</span>
-              <button 
-                type="button"
-                onClick={onOpenValuationInfo}
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: 'var(--apple-green)', 
-                  cursor: 'pointer', 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  padding: 0
-                }}
-                title="Learn how market value is calculated"
-              >
-                <HelpCircle size={13} />
-              </button>
-            </div>
-            <div className="stat-icon-capsule" style={{ background: 'rgba(48, 209, 88, 0.15)', color: '#34d399' }}>
-              <TrendingUp size={15} />
-            </div>
-          </div>
-          <div className="stat-number" style={{ color: '#34d399' }}>{formatVND(stats.total_value)}</div>
-          <div className="stat-sub">
-            <span className={`gain-badge ${isPositive ? 'positive' : 'negative'}`}>
-              {isPositive ? '+' : ''}{profitPct}%
+            <span style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+              {Object.entries(stats.scale_breakdown || {}).slice(0, 3).map(([scale, count]) => (
+                <span key={scale} style={{ fontSize: '0.72rem', padding: '0.15rem 0.45rem', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.08)' }}>
+                  {scale}: {count}
+                </span>
+              ))}
             </span>
-            <span>{isPositive ? '+' : ''}{formatVND(profit)} gain</span>
           </div>
         </div>
 
-        {/* Card 4: Highlight Random Car from Collection */}
+        {/* Card 3: Highlight Random Car from Collection */}
         <div 
           className="stat-card" 
           onClick={() => highlightCar && onSelectCar && onSelectCar(highlightCar)}
@@ -147,8 +114,8 @@ export default function StatsHeader({ stats, items = [], onSelectCar, onOpenValu
               {/* Mini Thumbnail */}
               <div 
                 style={{ 
-                  width: '52px', 
-                  height: '52px', 
+                  width: '48px', 
+                  height: '48px', 
                   borderRadius: 'var(--radius-sm)', 
                   overflow: 'hidden', 
                   background: '#090b10', 
@@ -170,13 +137,13 @@ export default function StatsHeader({ stats, items = [], onSelectCar, onOpenValu
                   <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--apple-blue)', textTransform: 'uppercase' }}>
                     {highlightCar.brand}
                   </span>
-                  <span style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: 'var(--radius-pill)', background: 'rgba(255, 255, 255, 0.1)', color: 'var(--text-secondary)' }}>
+                  <span className="scale-pill-badge" style={{ position: 'static', padding: '0.1rem 0.4rem', fontSize: '0.65rem' }}>
                     {highlightCar.scale}
                   </span>
                 </div>
                 <div 
                   style={{ 
-                    fontSize: '0.95rem', 
+                    fontSize: '0.92rem', 
                     fontWeight: 700, 
                     color: 'var(--text-primary)', 
                     whiteSpace: 'nowrap', 
@@ -188,9 +155,6 @@ export default function StatsHeader({ stats, items = [], onSelectCar, onOpenValu
                 >
                   {highlightCar.casting_name}
                 </div>
-                <div style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 600, marginTop: '0.15rem' }}>
-                  {formatVND(highlightCar.current_value)}
-                </div>
               </div>
             </div>
           ) : (
@@ -200,7 +164,7 @@ export default function StatsHeader({ stats, items = [], onSelectCar, onOpenValu
           )}
 
           <div className="stat-sub" style={{ marginTop: '0.65rem', justifyContent: 'space-between' }}>
-            <span>{items.length > 0 ? 'Click card to view details' : 'No items yet'}</span>
+            <span>{items.length > 0 ? 'Click to inspect model' : 'No items yet'}</span>
             {highlightCar && <ArrowRight size={12} color="var(--apple-blue)" />}
           </div>
         </div>

@@ -3,7 +3,7 @@ import { Star, Tag, Eye, Edit3, Trash2, TrendingUp } from 'lucide-react';
 import { formatVND } from '../services/api';
 import { sound } from '../services/soundEffects';
 
-export default function ItemListView({ items, onSelect, onEdit, onDelete, onToggleFavorite }) {
+export default function ItemListView({ items, onSelect, onEdit, onDelete, onToggleFavorite, isAdmin = true, showPrices = true }) {
   if (!items || items.length === 0) return null;
 
   return (
@@ -17,9 +17,13 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
             <th>Brand</th>
             <th>Scale</th>
             <th>Condition</th>
-            <th style={{ textAlign: 'right' }}>Cost Paid</th>
-            <th style={{ textAlign: 'right' }}>Est. Value</th>
-            <th style={{ textAlign: 'center', width: '110px' }}>Actions</th>
+            {showPrices && (
+              <>
+                <th style={{ textAlign: 'right' }}>Cost Paid</th>
+                <th style={{ textAlign: 'right' }}>Est. Value</th>
+              </>
+            )}
+            <th style={{ textAlign: 'center', width: isAdmin ? '110px' : '60px' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -88,20 +92,23 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
                   </span>
                 </td>
 
-                {/* Purchase Cost */}
-                <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 600, fontSize: '0.85rem' }}>
-                  {formatVND(item.purchase_price)}
-                </td>
+                {/* Optional Prices */}
+                {showPrices && (
+                  <>
+                    <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 600, fontSize: '0.85rem' }}>
+                      {formatVND(item.purchase_price)}
+                    </td>
 
-                {/* Valuation & Gain */}
-                <td style={{ textAlign: 'right' }}>
-                  <div style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#34d399', fontSize: '0.9rem' }}>
-                    {formatVND(item.current_value)}
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: isPositive ? 'var(--apple-green)' : 'var(--apple-red)' }}>
-                    {isPositive ? '+' : ''}{formatVND(profit)}
-                  </div>
-                </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#34d399', fontSize: '0.9rem' }}>
+                        {formatVND(item.current_value)}
+                      </div>
+                      <div style={{ fontSize: '0.68rem', color: isPositive ? 'var(--apple-green)' : 'var(--apple-red)' }}>
+                        {isPositive ? '+' : ''}{formatVND(profit)}
+                      </div>
+                    </td>
+                  </>
+                )}
 
                 {/* Quick Actions */}
                 <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
@@ -110,26 +117,30 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
                       className="btn btn-secondary btn-icon"
                       style={{ width: 28, height: 28 }}
                       onClick={() => onSelect(item)}
-                      title="View Details"
+                      title="Inspect Model"
                     >
                       <Eye size={12} />
                     </button>
-                    <button 
-                      className="btn btn-secondary btn-icon"
-                      style={{ width: 28, height: 28 }}
-                      onClick={() => onEdit(item)}
-                      title="Edit Model"
-                    >
-                      <Edit3 size={12} />
-                    </button>
-                    <button 
-                      className="btn btn-secondary btn-icon"
-                      style={{ width: 28, height: 28, color: 'var(--apple-red)' }}
-                      onClick={() => onDelete(item)}
-                      title="Delete Model"
-                    >
-                      <Trash2 size={12} />
-                    </button>
+                    {isAdmin && (
+                      <>
+                        <button 
+                          className="btn btn-secondary btn-icon"
+                          style={{ width: 28, height: 28 }}
+                          onClick={() => onEdit(item)}
+                          title="Edit Model"
+                        >
+                          <Edit3 size={12} />
+                        </button>
+                        <button 
+                          className="btn btn-secondary btn-icon"
+                          style={{ width: 28, height: 28, color: 'var(--apple-red)' }}
+                          onClick={() => onDelete(item)}
+                          title="Delete Model"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>

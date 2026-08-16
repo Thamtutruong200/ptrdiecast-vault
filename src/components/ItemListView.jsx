@@ -1,10 +1,10 @@
 import React from 'react';
 import { Star, Eye, Edit3, Trash2 } from 'lucide-react';
-import { formatVND } from '../services/api';
+import { formatCurrency } from '../services/currency';
 import { sound } from '../services/soundEffects';
 import { BrandBadge } from '../services/brandLogos';
 
-export default function ItemListView({ items, onSelect, onEdit, onDelete, onToggleFavorite, isAdmin = true, showPrices = true }) {
+export default function ItemListView({ items, onSelect, onEdit, onDelete, onToggleFavorite, isAdmin = true, showPrices = true, currency = 'VND' }) {
   if (!items || items.length === 0) return null;
 
   return (
@@ -103,15 +103,15 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
                 {showPrices && (
                   <>
                     <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {formatVND(item.purchase_price)}
+                      {formatCurrency(item.purchase_price, currency)}
                     </td>
 
                     <td style={{ textAlign: 'right' }}>
                       <div style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#34d399', fontSize: '0.875rem' }}>
-                        {formatVND(item.current_value)}
+                        {formatCurrency(item.current_value, currency)}
                       </div>
-                      <div style={{ fontSize: '0.65rem', color: isPositive ? 'var(--apple-green)' : 'var(--apple-red)' }}>
-                        {isPositive ? '+' : ''}{formatVND(profit)}
+                      <div style={{ fontSize: '0.68rem', color: isPositive ? '#34d399' : '#f87171' }}>
+                        {isPositive ? '+' : ''}{formatCurrency(profit, currency)}
                       </div>
                     </td>
                   </>

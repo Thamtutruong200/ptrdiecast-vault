@@ -22,6 +22,9 @@ import AdminLoginModal from './components/AdminLoginModal';
 import AdminConsoleModal from './components/AdminConsoleModal';
 import ExcelSheetModal from './components/ExcelSheetModal';
 import IntroSequence from './components/IntroSequence';
+import CollectorCertificateModal from './components/CollectorCertificateModal';
+import MuseumShowroomModal from './components/MuseumShowroomModal';
+import { getSavedCurrency, saveCurrency } from './services/currency';
 import ptrLogo from './assets/ptr-logo.png';
 
 export default function App() {
@@ -75,6 +78,13 @@ export default function App() {
   const [isValuationInfoOpen, setIsValuationInfoOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
 
+  // Global Multi-Currency State (VND, USD, EUR, JPY, GBP)
+  const [currency, setCurrency] = useState(() => getSavedCurrency());
+
+  // Luxury Modal States
+  const [certificateItem, setCertificateItem] = useState(null);
+  const [isShowroomOpen, setIsShowroomOpen] = useState(false);
+
   // Duplicate Warning Modal State
   const [duplicateModalData, setDuplicateModalData] = useState(null);
 
@@ -117,6 +127,12 @@ export default function App() {
           setEditingItem(null);
           setIsAddModalOpen(true);
         }
+      } else if (e.key === 'f' || e.key === 'F') {
+        if (!e.target.matches('input, textarea, select')) {
+          e.preventDefault();
+          sound.playSheetOpen();
+          setIsShowroomOpen(prev => !prev);
+        }
       } else if (e.key === '1') {
         sound.playTap();
         setViewMode('grid');
@@ -132,6 +148,12 @@ export default function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isAdmin]);
+
+  const handleCurrencyChange = (newCurr) => {
+    setCurrency(newCurr);
+    saveCurrency(newCurr);
+    addToast(`Currency switched to ${newCurr}`);
+  };
 
   // Load items and stats based on category
   const loadData = useCallback(async () => {
@@ -317,6 +339,9 @@ export default function App() {
           }}
           theme={theme}
           setTheme={setTheme}
+          currency={currency}
+          onCurrencyChange={handleCurrencyChange}
+          onOpenShowroom={() => setIsShowroomOpen(true)}
         />
 
         <main className="container">
@@ -366,9 +391,10 @@ export default function App() {
                 onToggleFavorite={handleToggleFavorite}
                 isAdmin={isAdmin}
                 showPrices={showPrices}
+                currency={currency}
               />
             ) : (
-              /* View 2: 4 Cars Per Row Liquid Glass Gallery Grid */
+              /* View 2: 4 Cars Per Row Liquid Glass Gallery Grid with 3D Physics */
               <div className="items-grid">
                 {items.map((item) => (
                   <ItemCard
@@ -380,6 +406,7 @@ export default function App() {
                     }}
                     onToggleFavorite={handleToggleFavorite}
                     showPrices={showPrices}
+                    currency={currency}
                   />
                 ))}
               </div>
@@ -467,8 +494,13 @@ export default function App() {
             onDelete={handleDeleteItem}
             onToggleFavorite={handleToggleFavorite}
             onOpenValuationInfo={() => setIsValuationInfoOpen(true)}
+            onOpenCertificate={(it) => {
+              sound.playStar();
+              setCertificateItem(it);
+            }}
             isAdmin={isAdmin}
             showPrices={showPrices}
+            currency={currency}
           />
         )}
 
@@ -555,6 +587,24 @@ export default function App() {
             onOpenSync={() => setIsExportImportOpen(true)}
             onOpenAnalytics={() => setIsAnalyticsOpen(true)}
             onOpenExcelSheet={() => setIsExcelSheetOpen(true)}
+          />
+        )}
+
+        {/* Sotheby's / Apple Style Collector Certificate of Authenticity */}
+        {certificateItem && (
+          <CollectorCertificateModal 
+            item={certificateItem}
+            onClose={() => setCertificateItem(null)}
+            currency={currency}
+          />
+        )}
+
+        {/* Museum Showroom Fullscreen Kiosk Mode (Press F) */}
+        {isShowroomOpen && (
+          <MuseumShowroomModal 
+            items={items}
+            onClose={() => setIsShowroomOpen(false)}
+            currency={currency}
           />
         )}
 

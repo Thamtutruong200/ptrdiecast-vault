@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { 
   X, Star, Edit3, Trash2, Tag, TrendingUp, HelpCircle, 
-  ShieldCheck, ZoomIn, ZoomOut, Flag, Image as ImageIcon 
+  ShieldCheck, ZoomIn, ZoomOut, Flag, Image as ImageIcon, Award 
 } from 'lucide-react';
-import { formatVND } from '../services/api';
+import { formatCurrency } from '../services/currency';
 import { sound } from '../services/soundEffects';
 import { BrandBadge } from '../services/brandLogos';
 
@@ -14,8 +14,10 @@ export default function ItemDetailModal({
   onDelete, 
   onToggleFavorite, 
   onOpenValuationInfo,
+  onOpenCertificate,
   isAdmin = true,
-  showPrices = true
+  showPrices = true,
+  currency = 'VND'
 }) {
   if (!item) return null;
 
@@ -203,14 +205,14 @@ export default function ItemDetailModal({
                     <div>
                       <div className="price-title">Paid Cost</div>
                       <div className="price-amount" style={{ fontSize: '1.25rem', marginTop: '0.2rem' }}>
-                        {formatVND(item.purchase_price)}
+                        {formatCurrency(item.purchase_price, currency)}
                       </div>
                     </div>
 
                     <div style={{ textAlign: 'right' }}>
                       <div className="price-title">Est. Market Value</div>
                       <div className="price-amount highlight" style={{ fontSize: '1.35rem', marginTop: '0.2rem' }}>
-                        {formatVND(item.current_value)}
+                        {formatCurrency(item.current_value, currency)}
                       </div>
                     </div>
                   </div>
@@ -218,7 +220,7 @@ export default function ItemDetailModal({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.45rem', borderTop: '1px solid var(--glass-border)', fontSize: '0.8125rem' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Net Capital Gain:</span>
                     <span className={`gain-badge ${isPositive ? 'positive' : 'negative'}`}>
-                      {isPositive ? '+' : ''}{profitPct}% ({isPositive ? '+' : ''}{formatVND(profit)})
+                      {isPositive ? '+' : ''}{profitPct}% ({isPositive ? '+' : ''}{formatCurrency(profit, currency)})
                     </span>
                   </div>
 
@@ -285,41 +287,55 @@ export default function ItemDetailModal({
                 </div>
               )}
 
-              {/* Action Bar (Only visible to Admin) */}
-              {isAdmin ? (
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '0.75rem' }}>
-                  <button 
-                    className="btn btn-secondary" 
-                    style={{ flex: 1 }}
-                    onClick={() => {
-                      sound.playTap();
-                      onClose();
-                      onEdit(item);
-                    }}
-                  >
-                    <Edit3 size={15} />
-                    <span>Edit Details</span>
-                  </button>
+              {/* Action Bar */}
+              <div style={{ display: 'flex', gap: '0.65rem', marginTop: 'auto', paddingTop: '0.75rem', flexWrap: 'wrap' }}>
+                {/* Certificate of Authenticity Button (Available to all visitors & admin) */}
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ flex: 1, borderColor: 'rgba(212, 175, 55, 0.45)', background: 'linear-gradient(145deg, rgba(212, 175, 55, 0.12), rgba(18, 22, 34, 0.6))', color: '#d4af37' }}
+                  onClick={() => onOpenCertificate && onOpenCertificate(item)}
+                  title="Generate Sotheby's / Apple style Certificate of Authenticity"
+                >
+                  <Award size={15} />
+                  <span>Certificate</span>
+                </button>
 
-                  <button 
-                    className="btn btn-secondary" 
-                    style={{ color: 'var(--apple-red)' }}
-                    onClick={() => {
-                      onDelete(item);
-                      onClose();
-                    }}
-                  >
-                    <Trash2 size={15} />
-                    <span>Delete</span>
+                {isAdmin && (
+                  <>
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ flex: 1 }}
+                      onClick={() => {
+                        sound.playTap();
+                        onClose();
+                        onEdit(item);
+                      }}
+                    >
+                      <Edit3 size={15} />
+                      <span>Edit</span>
+                    </button>
+
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ color: 'var(--apple-red)' }}
+                      onClick={() => {
+                        onDelete(item);
+                        onClose();
+                      }}
+                    >
+                      <Trash2 size={15} />
+                      <span>Delete</span>
+                    </button>
+                  </>
+                )}
+
+                {!isAdmin && (
+                  <button className="btn btn-secondary btn-sm" onClick={onClose} style={{ marginLeft: 'auto' }}>
+                    Close
                   </button>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'auto', paddingTop: '0.75rem' }}>
-                  <button className="btn btn-secondary btn-sm" onClick={onClose}>
-                    Close Spectator View
-                  </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>

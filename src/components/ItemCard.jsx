@@ -1,12 +1,36 @@
-import React from 'react';
-import { Star, Tag, TrendingUp } from 'lucide-react';
-import { formatVND } from '../services/api';
+import React, { useState, useRef } from 'react';
+import { Star, Tag, TrendingUp, Sparkles } from 'lucide-react';
+import { formatCurrency } from '../services/currency';
 import { BrandBadge } from '../services/brandLogos';
 
-export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices = true }) {
+export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices = true, currency = 'VND' }) {
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+
   const primaryPhoto = (item.photos && item.photos.length > 0) 
     ? item.photos[0] 
     : 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=800&q=80';
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Smooth subtle 3D tilt max 8 degrees
+    const rotateX = ((y - centerY) / centerY) * -7;
+    const rotateY = ((x - centerX) / centerX) * 7;
+    const glareX = (x / rect.width) * 100;
+    const glareY = (y / rect.height) * 100;
+
+    setTilt({ x: rotateX, y: rotateY, glareX, glareY, opacity: 0.15 });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+  };
 
   const handleCardClick = (e) => {
     if (e.target.closest('.fav-capsule')) {
@@ -25,7 +49,31 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
   };
 
   return (
-    <div className="item-card" onClick={handleCardClick}>
+    <div 
+      ref={cardRef}
+      className="item-card" 
+      onClick={handleCardClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateY(${tilt.opacity > 0 ? '-4px' : '0px'})`,
+        transition: tilt.opacity > 0 ? 'transform 0.1s ease-out' : 'transform 0.4s ease, box-shadow 0.4s ease',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
+    >
+      {/* Specular Light Reflection Glare */}
+      <div 
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          background: `radial-gradient(circle at ${tilt.glareX}% ${tilt.glareY}%, rgba(255, 255, 255, ${tilt.opacity}) 0%, transparent 60%)`,
+          zIndex: 5,
+          transition: 'opacity 0.2s ease'
+        }}
+      />
+
       {/* Media Section */}
       <div className="card-media">
         <img 
@@ -105,12 +153,12 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
             <>
               <div className="price-unit">
                 <span className="price-title">Paid</span>
-                <span className="price-amount">{formatVND(item.purchase_price)}</span>
+                <span className="price-amount">{formatCurrency(item.purchase_price, currency)}</span>
               </div>
 
               <div className="price-unit" style={{ textAlign: 'right' }}>
                 <span className="price-title">Est. Value</span>
-                <span className="price-amount highlight">{formatVND(item.current_value)}</span>
+                <span className="price-amount highlight">{formatCurrency(item.current_value, currency)}</span>
               </div>
             </>
           ) : (

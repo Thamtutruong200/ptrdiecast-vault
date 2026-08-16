@@ -24,7 +24,10 @@ export default function Navbar({
   activeCategory,
   setActiveCategory,
   theme,
-  setTheme
+  setTheme,
+  currency = 'VND',
+  onCurrencyChange,
+  onOpenShowroom
 }) {
   const [isMuted, setIsMuted] = useState(sound.muted);
 
@@ -97,6 +100,50 @@ export default function Navbar({
 
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* Global Currency Switcher */}
+          <select
+            className="currency-select-pill"
+            value={currency}
+            onChange={(e) => {
+              sound.playTap();
+              onCurrencyChange && onCurrencyChange(e.target.value);
+            }}
+            title="Convert currency (VND, USD, EUR, JPY, GBP)"
+            style={{
+              background: 'rgba(255, 255, 255, 0.06)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: 'var(--radius-pill)',
+              color: '#34d399',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              padding: '0.35rem 0.65rem',
+              cursor: 'pointer',
+              outline: 'none',
+              fontFamily: 'inherit'
+            }}
+          >
+            <option value="VND" style={{ background: '#121622', color: '#fff' }}>₫ VND</option>
+            <option value="USD" style={{ background: '#121622', color: '#fff' }}>$ USD</option>
+            <option value="EUR" style={{ background: '#121622', color: '#fff' }}>€ EUR</option>
+            <option value="JPY" style={{ background: '#121622', color: '#fff' }}>¥ JPY</option>
+            <option value="GBP" style={{ background: '#121622', color: '#fff' }}>£ GBP</option>
+          </select>
+
+          {/* Museum Exhibition Mode */}
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={() => {
+              sound.playSheetOpen();
+              onOpenShowroom && onOpenShowroom();
+            }}
+            title="Open Fullscreen Museum Kiosk Presentation (Shortcut: F)"
+            style={{ borderRadius: 'var(--radius-pill)', borderColor: 'rgba(212, 175, 55, 0.35)', color: '#d4af37' }}
+          >
+            <span>🏛️</span>
+            <span style={{ display: isRealMobile ? 'none' : 'inline' }}>Showroom</span>
+          </button>
+
           {/* Light / Dark Mode Toggle */}
           <ThemeToggle theme={theme} setTheme={setTheme} />
 

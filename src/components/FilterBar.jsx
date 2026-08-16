@@ -73,7 +73,7 @@ export default function FilterBar({
           />
         </div>
 
-        {/* View Mode Segmented Switcher */}
+        {/* View Mode Segmented Switcher (Gallery vs List View) */}
         <div className="category-switcher-capsule" style={{ padding: '2px' }}>
           <button 
             type="button"
@@ -90,28 +90,15 @@ export default function FilterBar({
 
           <button 
             type="button"
-            className={`category-tab-btn ${viewMode === 'showcase' ? 'active' : ''}`}
-            onClick={() => {
-              sound.playTap();
-              setViewMode('showcase');
-            }}
-            title="3D Cinematic Showcase Studio (2)"
-          >
-            <Sparkles size={13} />
-            <span style={{ fontSize: '0.75rem' }}>Showcase</span>
-          </button>
-
-          <button 
-            type="button"
             className={`category-tab-btn ${viewMode === 'list' ? 'active' : ''}`}
             onClick={() => {
               sound.playTap();
               setViewMode('list');
             }}
-            title="Compact Table List View (3)"
+            title="Compact List View (2)"
           >
             <Table size={13} />
-            <span style={{ fontSize: '0.75rem' }}>Table</span>
+            <span style={{ fontSize: '0.75rem' }}>List View</span>
           </button>
         </div>
       </div>

@@ -290,6 +290,59 @@ export function formatVND(amount) {
   }).format(amount);
 }
 
+// Client-Side Canvas Image Compression for Lightning-Fast Supabase Storage
+async function compressImage(file, maxDimension = 1920, quality = 0.85) {
+  // If not an image or already very small (< 150KB), return as is
+  if (!file.type.startsWith('image/') || file.size < 150 * 1024) {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const optimizedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+              });
+              resolve(optimizedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
 export const api = {
   // Check Connection Status
   async checkConnectionStatus() {
@@ -528,31 +581,41 @@ export const api = {
     return { success: true, count: updatedItems.length };
   },
 
-  // Upload Single Photo
+  // Upload Single Photo to Supabase Object Storage
   async uploadPhoto(file) {
+    // 1. Optimize / compress image before upload
+    const optimizedFile = await compressImage(file);
+
     const supabase = getSupabase();
     if (supabase) {
       try {
-        const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-        const { data, error } = await supabase.storage.from('diecast-photos').upload(filename, file, {
-          cacheControl: '3600',
+        const cleanName = optimizedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const filename = `vault-${Date.now()}-${cleanName}`;
+        
+        const { data, error } = await supabase.storage.from('diecast-photos').upload(filename, optimizedFile, {
+          cacheControl: '31536000', // 1 year cache
+          contentType: optimizedFile.type || 'image/jpeg',
           upsert: true
         });
-        if (!error) {
+
+        if (!error && data) {
           const { data: pubData } = supabase.storage.from('diecast-photos').getPublicUrl(filename);
           return { url: pubData.publicUrl, filename };
+        } else if (error) {
+          console.warn('Supabase storage upload error:', error.message);
         }
       } catch (e) {
-        console.warn('Supabase storage upload error:', e);
+        console.warn('Supabase storage upload exception:', e);
       }
     }
 
+    // Fallback: convert to base64 Data URL
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         resolve({ url: e.target.result, filename: file.name });
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(optimizedFile);
     });
   },
 

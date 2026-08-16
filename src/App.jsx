@@ -307,7 +307,7 @@ export default function App() {
             activeCategory={activeCategory}
           />
 
-          {/* Dynamic View Modes: Gallery Grid (4-col) | 3D Showcase Stage | macOS Table List */}
+          {/* Dynamic View Modes: Gallery Grid (4-col) | macOS List View */}
           {isLoading ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem 0', gap: '0.85rem' }}>
               <Loader2 size={34} className="animate-spin" color="var(--apple-blue)" />
@@ -316,19 +316,8 @@ export default function App() {
               </div>
             </div>
           ) : items.length > 0 ? (
-            viewMode === 'showcase' ? (
-              /* View 1: 3D Cinematic Showcase Studio Stage */
-              <ShowcaseStage 
-                items={items}
-                onSelectCar={(it) => {
-                  sound.playSheetOpen();
-                  setSelectedItem(it);
-                }}
-                onToggleFavorite={handleToggleFavorite}
-                showPrices={showPrices}
-              />
-            ) : viewMode === 'list' ? (
-              /* View 2: macOS Finder Compact Table List */
+            viewMode === 'list' ? (
+              /* View 1: macOS Finder Compact Table List */
               <ItemListView 
                 items={items}
                 onSelect={(it) => {
@@ -346,7 +335,7 @@ export default function App() {
                 showPrices={showPrices}
               />
             ) : (
-              /* View 3: 4 Cars Per Row Liquid Glass Gallery Grid */
+              /* View 2: 4 Cars Per Row Liquid Glass Gallery Grid */
               <div className="items-grid">
                 {items.map((item) => (
                   <ItemCard

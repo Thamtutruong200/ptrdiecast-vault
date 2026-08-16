@@ -266,10 +266,11 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
               <UploadCloud size={28} color="var(--text-tertiary)" />
               <div>
                 <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                  {isUploading ? 'Uploading photos...' : 'Drag photos, click to browse, or snap with phone camera'}
+                  {isUploading ? 'Compressing & uploading to Supabase...' : 'Drag photos, click to browse, or snap with phone camera'}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.15rem' }}>
-                  High-res JPG, PNG, or WebP
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: '#34d399', marginTop: '0.2rem', fontWeight: 600 }}>
+                  <Sparkles size={12} />
+                  <span>⚡ Auto-Compressor: Optimized to ~250 KB – 400 KB (max 1920px)</span>
                 </div>
               </div>
             </div>

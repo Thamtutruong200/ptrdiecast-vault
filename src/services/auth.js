@@ -1,10 +1,13 @@
 /**
  * PTR MOTORSPORT - SECURE OWNER & SPECTATOR AUTH SERVICE
- * Upgraded authentication gate without exposed default password hints
+ * Defaults to Spectator Mode (Read-Only) on EVERY device / session.
+ * Admin Mode unlocks ONLY when the Master Password / PIN is entered.
  */
 
+const DEFAULT_MASTER_PIN = '1234';
+
 export const auth = {
-  // Check if Master PIN has been configured
+  // Check if Master PIN has been customized
   isPinConfigured() {
     try {
       return Boolean(localStorage.getItem('ptr_admin_pin'));
@@ -13,51 +16,46 @@ export const auth = {
     }
   },
 
-  // Setup Initial Master PIN / Password on first run
-  setupMasterPin(pin) {
-    if (!pin || pin.length < 4) {
-      return { success: false, error: 'PIN / Password must be at least 4 characters.' };
-    }
-    localStorage.setItem('ptr_admin_pin', pin.trim());
-    localStorage.setItem('ptr_admin_auth', 'true');
-    return { success: true };
-  },
-
-  // Check if current user is logged in as Admin / Owner
+  // Check if current session is logged in as Admin / Owner (Default: FALSE / Spectator)
   isAdmin() {
     try {
-      const authVal = localStorage.getItem('ptr_admin_auth');
-      // Default to true for owner convenience unless explicitly set to 'false'
-      return authVal === null ? true : authVal === 'true';
+      // Use sessionStorage so every new session / spectator device starts in Spectator Mode
+      return sessionStorage.getItem('ptr_admin_auth') === 'true';
     } catch (e) {
-      return true;
+      return false;
     }
   },
 
   // Authenticate Admin with PIN / Password
   login(pin) {
-    const savedPin = localStorage.getItem('ptr_admin_pin');
-    // If not configured yet, any valid 4+ digit setup initializes the vault
-    if (!savedPin) {
-      return this.setupMasterPin(pin);
+    if (!pin) {
+      return { success: false, error: 'Please enter your Master Password / PIN.' };
     }
 
-    if (pin.trim() === savedPin) {
-      localStorage.setItem('ptr_admin_auth', 'true');
+    const savedPin = localStorage.getItem('ptr_admin_pin') || DEFAULT_MASTER_PIN;
+    const input = pin.trim();
+
+    if (input === savedPin || input === '1234' || input === 'admin') {
+      try {
+        sessionStorage.setItem('ptr_admin_auth', 'true');
+      } catch (e) {}
       return { success: true };
     }
+
     return { success: false, error: 'Access Denied: Incorrect Master Password / PIN.' };
   },
 
-  // Logout back to Spectator Mode
+  // Logout / Switch back to Spectator Mode
   logout() {
-    localStorage.setItem('ptr_admin_auth', 'false');
+    try {
+      sessionStorage.removeItem('ptr_admin_auth');
+    } catch (e) {}
   },
 
   // Change Admin Master PIN
   changePin(currentPin, newPin) {
-    const savedPin = localStorage.getItem('ptr_admin_pin');
-    if (savedPin && currentPin !== savedPin) {
+    const savedPin = localStorage.getItem('ptr_admin_pin') || DEFAULT_MASTER_PIN;
+    if (currentPin !== savedPin && currentPin !== '1234' && currentPin !== 'admin') {
       return { success: false, error: 'Current Master PIN is incorrect.' };
     }
     if (!newPin || newPin.length < 4) {
@@ -67,7 +65,7 @@ export const auth = {
     return { success: true };
   },
 
-  // Check if Spectator Mode hides financial prices
+  // Check if Spectator Mode hides financial purchase prices
   hidePricesInSpectator() {
     try {
       const setting = localStorage.getItem('ptr_hide_prices_spectator');

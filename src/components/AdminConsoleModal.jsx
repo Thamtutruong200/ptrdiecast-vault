@@ -287,7 +287,20 @@ export default function AdminConsoleModal({
             </form>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+            <button 
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => {
+                auth.logout();
+                onClose();
+                if (onSwitchToSpectator) onSwitchToSpectator();
+              }}
+              style={{ color: '#f87171', borderColor: 'rgba(255, 69, 58, 0.35)', background: 'rgba(255, 69, 58, 0.08)' }}
+            >
+              <Eye size={14} />
+              <span>Lock & Return to Spectator Mode</span>
+            </button>
             <button className="btn btn-primary btn-sm" onClick={onClose}>
               Done
             </button>

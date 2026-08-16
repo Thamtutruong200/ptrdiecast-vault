@@ -343,6 +343,26 @@ async function compressImage(file, maxDimension = 1920, quality = 0.85) {
   });
 }
 
+// Local Storage Persistent Store Helpers
+const STORAGE_KEY = 'ptr_vault_items_v2';
+
+function loadLocalItems() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return [...MOCK_DATA];
+}
+
+function saveLocalItems(items) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  } catch (e) {}
+}
+
 export const api = {
   // Check Connection Status
   async checkConnectionStatus() {
@@ -369,53 +389,45 @@ export const api = {
   // Fetch Items by Category & Filters
   async getItems(filters = {}, category = 'diecast') {
     const supabase = getSupabase();
+    let items = [];
+    let isFromCloud = false;
+
     if (supabase) {
       try {
-        let query = supabase.from('diecasts').select('*');
-        
-        // Category filtering
-        if (category && category !== 'all') {
-          query = query.eq('category', category);
-        }
-
-        if (filters.scale && filters.scale !== 'All') query = query.eq('scale', filters.scale);
-        if (filters.brand && filters.brand !== 'All') query = query.eq('brand', filters.brand);
-        if (filters.condition && filters.condition !== 'All') query = query.eq('condition', filters.condition);
-        if (filters.is_favorite !== undefined && filters.is_favorite !== null) {
-          query = query.eq('is_favorite', filters.is_favorite);
-        }
-
-        const sortBy = filters.sort_by || 'created_at';
-        const isAsc = filters.sort_order === 'asc';
-        query = query.order(sortBy, { ascending: isAsc });
-
-        const { data, error } = await query;
-        if (!error && data) {
-          let resData = data;
-          if (filters.q) {
-            const q = filters.q.toLowerCase().trim();
-            resData = resData.filter(x => 
-              (x.casting_name && x.casting_name.toLowerCase().includes(q)) ||
-              (x.brand && x.brand.toLowerCase().includes(q)) ||
-              (x.livery && x.livery.toLowerCase().includes(q)) ||
-              (x.notes && x.notes.toLowerCase().includes(q))
-            );
-          }
-          return resData;
+        // Safe query that works whether or not category column is present in remote SQL
+        const { data, error } = await supabase.from('diecasts').select('*');
+        if (!error && Array.isArray(data)) {
+          items = data;
+          isFromCloud = true;
+          saveLocalItems(items);
+        } else if (error) {
+          console.warn('Supabase getItems query notice:', error.message);
         }
       } catch (e) {
-        console.warn('Supabase getItems query error:', e);
+        console.warn('Supabase fetch exception:', e);
       }
     }
 
-    // Local in-memory filter
-    let res = [...MOCK_DATA];
+    if (!isFromCloud) {
+      items = loadLocalItems();
+    }
+
+    // Category filtering
+    let res = items;
     if (category && category !== 'all') {
       res = res.filter(x => (x.category || 'diecast') === category);
     }
-    if (filters.scale && filters.scale !== 'All') res = res.filter(x => x.scale === filters.scale);
-    if (filters.brand && filters.brand !== 'All') res = res.filter(x => x.brand === filters.brand);
-    if (filters.condition && filters.condition !== 'All') res = res.filter(x => x.condition === filters.condition);
+
+    // Dynamic Filter properties
+    if (filters.scale && filters.scale !== 'All') {
+      res = res.filter(x => x.scale === filters.scale);
+    }
+    if (filters.brand && filters.brand !== 'All') {
+      res = res.filter(x => x.brand === filters.brand);
+    }
+    if (filters.condition && filters.condition !== 'All') {
+      res = res.filter(x => x.condition === filters.condition);
+    }
     if (filters.is_favorite !== undefined && filters.is_favorite !== null) {
       res = res.filter(x => x.is_favorite === filters.is_favorite);
     }
@@ -429,15 +441,16 @@ export const api = {
       );
     }
 
+    // Sort order
     const reverse = (filters.sort_order || 'desc').toLowerCase() === 'desc';
     if (filters.sort_by === 'current_value') {
       res.sort((a, b) => reverse ? (b.current_value - a.current_value) : (a.current_value - b.current_value));
     } else if (filters.sort_by === 'purchase_price') {
       res.sort((a, b) => reverse ? (b.purchase_price - a.purchase_price) : (a.purchase_price - b.purchase_price));
     } else if (filters.sort_by === 'casting_name') {
-      res.sort((a, b) => reverse ? b.casting_name.localeCompare(a.casting_name) : a.casting_name.localeCompare(b.casting_name));
+      res.sort((a, b) => reverse ? (b.casting_name || '').localeCompare(a.casting_name || '') : (a.casting_name || '').localeCompare(b.casting_name || ''));
     } else {
-      res.sort((a, b) => reverse ? (b.created_at || '').localeCompare(a.created_at || '') : (a.created_at || '').localeCompare(b.created_at || ''));
+      res.sort((a, b) => reverse ? ((b.created_at || '').localeCompare(a.created_at || '')) : ((a.created_at || '').localeCompare(b.created_at || '')));
     }
 
     return res;
@@ -494,8 +507,8 @@ export const api = {
 
   // Create Item
   async createItem(itemData) {
-    const supabase = getSupabase();
     const payload = {
+      id: itemData.id || ('ptr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7)),
       category: itemData.category || 'diecast',
       track_photos: itemData.track_photos || [],
       ...itemData,
@@ -503,49 +516,53 @@ export const api = {
       updated_at: new Date().toISOString()
     };
 
+    const supabase = getSupabase();
     if (supabase) {
       try {
         const { data, error } = await supabase.from('diecasts').insert([payload]).select();
         if (!error && data && data.length > 0) {
-          return data[0];
+          const created = data[0];
+          const local = loadLocalItems();
+          saveLocalItems([created, ...local.filter(x => x.id !== created.id)]);
+          return created;
         }
       } catch (e) {
         console.warn('Supabase createItem error:', e);
       }
     }
 
-    const newItem = {
-      ...payload,
-      id: 'local-' + Date.now() + Math.random().toString(36).substring(2, 6)
-    };
-    MOCK_DATA.unshift(newItem);
-    return newItem;
+    const local = loadLocalItems();
+    saveLocalItems([payload, ...local.filter(x => x.id !== payload.id)]);
+    return payload;
   },
 
   // Update Item
   async updateItem(id, itemData) {
     const supabase = getSupabase();
+    const payload = {
+      ...itemData,
+      updated_at: new Date().toISOString()
+    };
+
     if (supabase) {
       try {
-        const payload = {
-          ...itemData,
-          updated_at: new Date().toISOString()
-        };
         const { data, error } = await supabase.from('diecasts').update(payload).eq('id', id).select();
         if (!error && data && data.length > 0) {
-          return data[0];
+          const updated = data[0];
+          const local = loadLocalItems();
+          saveLocalItems(local.map(x => x.id === id ? { ...x, ...updated } : x));
+          return updated;
         }
       } catch (e) {
         console.warn('Supabase updateItem error:', e);
       }
     }
 
-    const idx = MOCK_DATA.findIndex(x => x.id === id);
-    if (idx !== -1) {
-      MOCK_DATA[idx] = { ...MOCK_DATA[idx], ...itemData, updated_at: new Date().toISOString() };
-      return MOCK_DATA[idx];
-    }
-    return itemData;
+    const local = loadLocalItems();
+    const updatedList = local.map(x => x.id === id ? { ...x, ...payload } : x);
+    saveLocalItems(updatedList);
+    const found = updatedList.find(x => x.id === id);
+    return found || { id, ...payload };
   },
 
   // Delete Item
@@ -553,12 +570,19 @@ export const api = {
     const supabase = getSupabase();
     if (supabase) {
       try {
-        await supabase.from('diecasts').delete().eq('id', id);
-        return true;
-      } catch (e) {}
+        const { error } = await supabase.from('diecasts').delete().eq('id', id);
+        if (error) {
+          console.warn('Supabase deleteItem warning:', error.message);
+        }
+      } catch (e) {
+        console.warn('Supabase delete exception:', e);
+      }
     }
 
-    MOCK_DATA = MOCK_DATA.filter(x => x.id !== id);
+    // Always delete from persistent local storage
+    const local = loadLocalItems();
+    const filtered = local.filter(x => x.id !== id);
+    saveLocalItems(filtered);
     return true;
   },
 
@@ -569,6 +593,7 @@ export const api = {
       try {
         const { data, error } = await supabase.from('diecasts').upsert(updatedItems, { onConflict: 'id' }).select();
         if (!error) {
+          saveLocalItems(data || updatedItems);
           return { success: true, count: data?.length || updatedItems.length };
         }
       } catch (e) {
@@ -576,8 +601,7 @@ export const api = {
       }
     }
 
-    // Local replacement
-    MOCK_DATA = [...updatedItems];
+    saveLocalItems(updatedItems);
     return { success: true, count: updatedItems.length };
   },
 
@@ -646,3 +670,4 @@ export const api = {
     };
   }
 };
+

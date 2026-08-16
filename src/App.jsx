@@ -168,17 +168,22 @@ export default function App() {
 
       if (editingItem && editingItem.id) {
         const updated = await api.updateItem(editingItem.id, payload);
+        setItems(prev => prev.map(i => i.id === editingItem.id ? { ...i, ...updated } : i));
         addToast(`Updated ${updated.casting_name}`);
         if (selectedItem && selectedItem.id === editingItem.id) {
           setSelectedItem(updated);
         }
       } else {
         const created = await api.createItem(payload);
+        setItems(prev => [created, ...prev]);
         addToast(`Added ${created.casting_name} to vault`);
       }
       setIsAddModalOpen(false);
       setEditingItem(null);
       setDuplicateModalData(null);
+      
+      const newStats = await api.getStats(activeCategory);
+      setStats(newStats);
       loadData();
     } catch (err) {
       alert('Error saving item: ' + err.message);
@@ -188,11 +193,16 @@ export default function App() {
   // Handle Delete
   const handleDeleteItem = async (item) => {
     try {
-      await api.deleteItem(item.id);
-      addToast(`Removed ${item.casting_name} from vault`);
+      sound.playTrash();
+      // Instant Optimistic Removal
+      setItems(prev => prev.filter(i => i.id !== item.id));
       if (selectedItem && selectedItem.id === item.id) {
         setSelectedItem(null);
       }
+      await api.deleteItem(item.id);
+      addToast(`Removed ${item.casting_name} from vault`);
+      const newStats = await api.getStats(activeCategory);
+      setStats(newStats);
       loadData();
     } catch (err) {
       alert('Failed to delete item: ' + err.message);

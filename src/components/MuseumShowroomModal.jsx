@@ -230,8 +230,8 @@ export default function MuseumShowroomModal({ items = [], onClose, currency = 'V
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '14px', padding: '1.25rem' }}>
             <div>
-              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 700 }}>Colorway</div>
-              <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 700, marginTop: '0.2rem' }}>{currentItem.color || 'Standard'}</div>
+              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 700 }}>Chassis Scale</div>
+              <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 700, marginTop: '0.2rem' }}>{currentItem.scale || '1:64'}</div>
             </div>
             <div>
               <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 700 }}>Condition</div>

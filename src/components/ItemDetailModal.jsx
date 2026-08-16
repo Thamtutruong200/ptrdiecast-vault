@@ -260,11 +260,6 @@ export default function ItemDetailModal({
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Body Color</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.color || 'N/A'}</span>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
                   <span style={{ color: 'var(--text-secondary)' }}>Era / Series</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.era || 'Motorsport'}</span>
                 </div>

@@ -161,8 +161,8 @@ export default function CollectorCertificateModal({ item, onClose, currency = 'V
             {/* Specifications Matrix Table */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '10px', padding: '1rem', marginBottom: '1.5rem' }}>
               <div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Colorway</div>
-                <div style={{ fontSize: '0.8rem', color: '#f5f5f7', fontWeight: 700, marginTop: '0.15rem' }}>{item.color || 'Factory Standard'}</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Livery / Theme</div>
+                <div style={{ fontSize: '0.8rem', color: '#f5f5f7', fontWeight: 700, marginTop: '0.15rem' }}>{item.livery || 'Factory Original'}</div>
               </div>
               <div>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Condition Rating</div>

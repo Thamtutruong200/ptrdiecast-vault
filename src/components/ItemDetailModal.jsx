@@ -64,9 +64,6 @@ export default function ItemDetailModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-lg" onClick={(e) => e.stopPropagation()}>
-        {/* iOS Style Sheet Handle Bar */}
-        <div className="sheet-handle-bar" />
-
         {/* Header */}
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>

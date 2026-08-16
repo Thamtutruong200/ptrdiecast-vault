@@ -242,7 +242,7 @@ export default function App() {
         <div className="liquid-orb liquid-orb-4" />
       </div>
 
-      <div className={`app-layout layout-mode-${activeLayout} ${isSheetOpen ? 'modal-retreat' : ''}`}>
+      <div className={`app-layout layout-mode-${activeLayout}`}>
         {/* Top Navigation */}
         <Navbar 
           totalCount={stats?.total_count || 0}

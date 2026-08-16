@@ -133,15 +133,6 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), filter 0.35s ease;
-}
-
-/* Retreat Effect when modal/sheet is open */
-.app-layout.modal-retreat {
-  transform: scale(0.965);
-  filter: brightness(0.85);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
 }
 
 .container {
@@ -740,42 +731,36 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   display: flex;
-  align-items: flex-end; /* Slide in from bottom */
+  align-items: center; /* Centered */
   justify-content: center;
-  animation: fadeIn 0.25s ease forwards;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
   width: 100%;
   max-width: 960px;
-  max-height: 92vh;
+  max-height: 90vh;
   background: var(--bg-surface);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: var(--glass-border);
-  border-top-left-radius: var(--radius-xl);
-  border-top-right-radius: var(--radius-xl);
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-elevated), var(--glass-specular-bright);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: slideUpSheet 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes slideUpSheet {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.sheet-handle-bar {
-  width: 42px;
-  height: 5px;
-  border-radius: var(--radius-pill);
-  background: var(--separator);
-  margin: 0.65rem auto 0.25rem;
-  flex-shrink: 0;
+@keyframes modalPopIn {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .modal-header {

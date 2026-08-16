@@ -194,9 +194,6 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-lg" onClick={(e) => e.stopPropagation()}>
-        {/* iOS Handle Bar */}
-        <div className="sheet-handle-bar" />
-
         {/* Header */}
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>

@@ -14,16 +14,19 @@ export default function AdminLoginModal({ onClose, onLoginSuccess }) {
     setIsLoading(true);
     try {
       const res = await auth.login(pin);
-      if (res.success) {
+      if (res && res.success) {
         sound.playStar();
-        onLoginSuccess();
         onClose();
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
       } else {
         sound.playTap();
-        setError(res.error || 'Access Denied: Incorrect Master Password');
+        setError(res?.error || 'Access Denied: Incorrect Master Password');
       }
     } catch (err) {
-      setError('Authentication check failed. Please check your connection.');
+      console.error('Login exception:', err);
+      setError(err?.message || 'Access Denied: Incorrect Master Password');
     } finally {
       setIsLoading(false);
     }

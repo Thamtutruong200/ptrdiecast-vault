@@ -55,9 +55,14 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
   });
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isTrackUploading, setIsTrackUploading] = useState(false);
+  const [modelPhotoUrlInput, setModelPhotoUrlInput] = useState('');
+  const [trackPhotoUrlInput, setTrackPhotoUrlInput] = useState('');
   const [duplicateMatches, setDuplicateMatches] = useState([]);
+  
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
+  const trackFileInputRef = useRef(null);
 
   useEffect(() => {
     if (item) {
@@ -110,7 +115,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
     return () => clearTimeout(timer);
   }, [formData.casting_name, formData.brand, formData.livery, item]);
 
-  // Handle Photo File Upload with Auto-Compressor
+  // Handle Model Photo File Upload
   const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -136,6 +141,54 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
       ...prev,
       photos: prev.photos.filter((_, idx) => idx !== indexToRemove)
     }));
+  };
+
+  const handleAddModelPhotoUrl = (e) => {
+    e.preventDefault();
+    if (!modelPhotoUrlInput.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      photos: [...prev.photos, modelPhotoUrlInput.trim()]
+    }));
+    setModelPhotoUrlInput('');
+  };
+
+  // Handle Real Race Track Photo File Upload
+  const handleTrackFileUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setIsTrackUploading(true);
+    try {
+      const uploadPromises = files.map(f => api.uploadPhoto(f));
+      const results = await Promise.all(uploadPromises);
+      const newUrls = results.map(r => r.url);
+      setFormData(prev => ({
+        ...prev,
+        track_photos: [...prev.track_photos, ...newUrls]
+      }));
+    } catch (err) {
+      alert('Track photo upload error: ' + err.message);
+    } finally {
+      setIsTrackUploading(false);
+    }
+  };
+
+  const removeTrackPhoto = (indexToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      track_photos: prev.track_photos.filter((_, idx) => idx !== indexToRemove)
+    }));
+  };
+
+  const handleAddTrackPhotoUrl = (e) => {
+    e.preventDefault();
+    if (!trackPhotoUrlInput.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      track_photos: [...prev.track_photos, trackPhotoUrlInput.trim()]
+    }));
+    setTrackPhotoUrlInput('');
   };
 
   const handleSubmit = (e) => {
@@ -178,12 +231,12 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
 
         {/* Form Body with Clear Sections */}
         <form onSubmit={handleSubmit} className="modal-body form-body-custom">
-          {/* SECTION 1: PHOTOS & VISUAL PROOF */}
+          {/* SECTION 1: DIECAST / TOY MODEL PHOTOS */}
           <div className="form-section-card">
             <div className="form-section-header">
               <div className="form-section-title">
                 <ImageIcon size={15} color="var(--apple-blue)" />
-                <span>Photos & Visual Proof</span>
+                <span>1. Vault Model Photos ({formData.photos.length})</span>
               </div>
               
               <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -203,7 +256,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                   title="Upload from computer"
                 >
                   <UploadCloud size={13} />
-                  <span>Upload</span>
+                  <span>Upload Model Photos</span>
                 </button>
               </div>
             </div>
@@ -231,24 +284,50 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
               className="upload-dropzone"
               onClick={() => fileInputRef.current?.click()}
             >
-              <UploadCloud size={30} color="var(--apple-blue)" />
+              <UploadCloud size={26} color="var(--apple-blue)" />
               <div>
-                <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                  {isUploading ? 'Compressing & uploading to Supabase...' : 'Click to Browse, Drag Photos, or Snap with Phone'}
+                <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+                  {isUploading ? 'Compressing & uploading model photos to Supabase...' : 'Click to Upload Physical Scale Model Photos'}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: '#34d399', marginTop: '0.25rem', fontWeight: 600 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: '#34d399', marginTop: '0.2rem', fontWeight: 600 }}>
                   <Sparkles size={11} />
                   <span>⚡ In-Browser Auto-Compressor (~250 KB – 400 KB, Max 1920px)</span>
                 </div>
               </div>
             </div>
 
+            {/* Quick URL Adder for Model Photo */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.65rem' }}>
+              <input 
+                type="url"
+                className="form-control"
+                style={{ fontSize: '0.8rem', height: '36px' }}
+                placeholder="Or paste direct image URL (https://...)"
+                value={modelPhotoUrlInput}
+                onChange={(e) => setModelPhotoUrlInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddModelPhotoUrl(e);
+                  }
+                }}
+              />
+              <button 
+                type="button" 
+                className="btn btn-secondary btn-sm"
+                onClick={handleAddModelPhotoUrl}
+                style={{ flexShrink: 0, height: '36px' }}
+              >
+                + Add URL
+              </button>
+            </div>
+
             {/* Thumbnails */}
             {formData.photos.length > 0 && (
-              <div className="upload-thumbnails">
+              <div className="upload-thumbnails" style={{ marginTop: '0.75rem' }}>
                 {formData.photos.map((url, idx) => (
                   <div key={idx} className="upload-thumb">
-                    <img src={url} alt="Uploaded preview" />
+                    <img src={url} alt="Uploaded model preview" />
                     <button 
                       type="button" 
                       className="upload-thumb-remove"
@@ -257,6 +336,107 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                         removePhoto(idx);
                       }}
                       title="Remove photo"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* SECTION 2: REAL 1:1 RACE TRACK & VEHICLE PHOTOS */}
+          <div className="form-section-card" style={{ borderColor: 'rgba(255, 159, 10, 0.35)', background: 'linear-gradient(145deg, rgba(255, 159, 10, 0.04), rgba(18, 22, 34, 0.6))' }}>
+            <div className="form-section-header">
+              <div>
+                <div className="form-section-title" style={{ color: 'var(--apple-amber)' }}>
+                  <span>🏁</span>
+                  <span>2. Real 1:1 Race Track & Vehicle Photos ({formData.track_photos.length})</span>
+                </div>
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '0.2rem' }}>
+                  Real race photos displayed on the <strong>🏁 Real Race Track</strong> tab in the car inspector.
+                </p>
+              </div>
+              
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => trackFileInputRef.current?.click()}
+                title="Upload real race photos"
+                style={{ color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.4)' }}
+              >
+                <UploadCloud size={13} />
+                <span>Upload Track Photos</span>
+              </button>
+            </div>
+
+            {/* Hidden Track File Input */}
+            <input 
+              type="file" 
+              ref={trackFileInputRef} 
+              onChange={handleTrackFileUpload} 
+              multiple 
+              accept="image/*" 
+              style={{ display: 'none' }} 
+            />
+
+            {/* Track Dropzone */}
+            <div 
+              className="upload-dropzone"
+              onClick={() => trackFileInputRef.current?.click()}
+              style={{ borderColor: 'rgba(255, 159, 10, 0.35)' }}
+            >
+              <span style={{ fontSize: '1.5rem' }}>🏎️</span>
+              <div>
+                <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+                  {isTrackUploading ? 'Compressing & uploading race track photos...' : 'Click to Upload Real 1:1 Race Car / Track Action Photos'}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                  Upload photos of the real car at Le Mans, Monaco GP, Nürburgring, or IMSA
+                </div>
+              </div>
+            </div>
+
+            {/* Quick URL Adder for Track Photo */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.65rem' }}>
+              <input 
+                type="url"
+                className="form-control"
+                style={{ fontSize: '0.8rem', height: '36px' }}
+                placeholder="Or paste direct real race photo URL (e.g. Wikipedia / Motorsport.com)"
+                value={trackPhotoUrlInput}
+                onChange={(e) => setTrackPhotoUrlInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddTrackPhotoUrl(e);
+                  }
+                }}
+              />
+              <button 
+                type="button" 
+                className="btn btn-secondary btn-sm"
+                onClick={handleAddTrackPhotoUrl}
+                style={{ flexShrink: 0, height: '36px', color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.4)' }}
+              >
+                + Add Track URL
+              </button>
+            </div>
+
+            {/* Track Thumbnails */}
+            {formData.track_photos.length > 0 && (
+              <div className="upload-thumbnails" style={{ marginTop: '0.75rem' }}>
+                {formData.track_photos.map((url, idx) => (
+                  <div key={idx} className="upload-thumb" style={{ borderColor: 'rgba(255, 159, 10, 0.5)' }}>
+                    <img src={url} alt="Track preview" />
+                    <button 
+                      type="button" 
+                      className="upload-thumb-remove"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeTrackPhoto(idx);
+                      }}
+                      title="Remove track photo"
                     >
                       <Trash2 size={11} />
                     </button>

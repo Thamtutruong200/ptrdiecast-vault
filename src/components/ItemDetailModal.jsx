@@ -25,10 +25,7 @@ export default function ItemDetailModal({
 
   const trackPhotos = item.track_photos && item.track_photos.length > 0
     ? item.track_photos
-    : [
-        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80'
-      ];
+    : (item.photos && item.photos.length > 0 ? item.photos : ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80']);
 
   const [activeTab, setActiveTab] = useState('model'); // 'model' or 'track'
   const currentPhotoList = activeTab === 'model' ? modelPhotos : trackPhotos;

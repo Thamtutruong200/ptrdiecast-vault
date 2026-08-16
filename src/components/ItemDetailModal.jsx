@@ -100,7 +100,7 @@ export default function ItemDetailModal({
 
         {/* Body */}
         <div className="modal-body">
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.25fr) minmax(0, 1fr)', gap: '1.85rem' }}>
+          <div className="detail-modal-grid">
             {/* Left: Dual Photo Gallery (Model Photos vs Real-life On Track Racing) */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {/* Photo Source Switcher: Model vs Track Heritage */}

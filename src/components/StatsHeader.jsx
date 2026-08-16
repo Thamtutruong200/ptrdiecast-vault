@@ -41,7 +41,7 @@ export default function StatsHeader({ stats, items = [], onSelectCar }) {
 
   return (
     <section className="stats-header">
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+      <div className="stats-grid">
         {/* Card 1: Total Vault Count */}
         <div className="stat-card">
           <div className="stat-top">

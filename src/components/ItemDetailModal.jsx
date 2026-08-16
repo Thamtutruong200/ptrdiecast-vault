@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { 
   X, Star, Edit3, Trash2, Tag, TrendingUp, HelpCircle, 
-  ShieldCheck, ZoomIn, ZoomOut, Flag, Image as ImageIcon, Award 
+  ShieldCheck, ZoomIn, ZoomOut, Flag, Image as ImageIcon, Award, Clock
 } from 'lucide-react';
 import { formatCurrency } from '../services/currency';
 import { sound } from '../services/soundEffects';
 import { BrandBadge } from '../services/brandLogos';
+import { formatRelativeOrDate, formatFullDateTime } from '../services/api';
 
 export default function ItemDetailModal({ 
   item, 
@@ -242,6 +243,19 @@ export default function ItemDetailModal({
                   </p>
                 </div>
               )}
+
+              {/* Timestamp & Sync Provenance Info */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.55rem 0.85rem', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)', fontSize: '0.75rem', color: 'var(--text-tertiary)', flexWrap: 'wrap', gap: '0.35rem' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Clock size={12} color="#34d399" />
+                  <span>Added: {formatFullDateTime(item.created_at)}</span>
+                </span>
+                {item.updated_at && item.updated_at !== item.created_at && (
+                  <span style={{ color: 'var(--text-secondary)' }} title={`Last Modified: ${formatFullDateTime(item.updated_at)}`}>
+                    Updated {formatRelativeOrDate(item.updated_at)}
+                  </span>
+                )}
+              </div>
 
               {/* Action Bar */}
               <div style={{ display: 'flex', gap: '0.65rem', marginTop: 'auto', paddingTop: '0.75rem', flexWrap: 'wrap' }}>

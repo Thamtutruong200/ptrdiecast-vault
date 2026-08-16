@@ -246,14 +246,14 @@ export default function App() {
       if (editingItem && editingItem.id) {
         const updated = await api.updateItem(editingItem.id, payload);
         setItems(prev => prev.map(i => i.id === editingItem.id ? { ...i, ...updated } : i));
-        addToast(`Updated ${updated.casting_name}`);
+        addToast?.(`Updated ${updated.casting_name}`);
         if (selectedItem && selectedItem.id === editingItem.id) {
           setSelectedItem(updated);
         }
       } else {
         const created = await api.createItem(payload);
         setItems(prev => [created, ...prev]);
-        addToast(`Added ${created.casting_name} to vault`);
+        addToast?.(`Added ${created.casting_name} to vault`);
       }
       setIsAddModalOpen(false);
       setEditingItem(null);
@@ -263,7 +263,8 @@ export default function App() {
       setStats(newStats);
       loadData();
     } catch (err) {
-      alert('Error saving item: ' + err.message);
+      console.error('Error saving item:', err);
+      addToast?.(err?.message || 'Error saving item', 'error');
     }
   };
 
@@ -277,12 +278,13 @@ export default function App() {
         setSelectedItem(null);
       }
       await api.deleteItem(item.id);
-      addToast(`Removed ${item.casting_name} from vault`);
+      addToast?.(`Removed ${item.casting_name} from vault`);
       const newStats = await api.getStats(activeCategory);
       setStats(newStats);
       loadData();
     } catch (err) {
-      alert('Failed to delete item: ' + err.message);
+      console.error('Failed to delete item:', err);
+      addToast?.(err?.message || 'Failed to delete item', 'error');
     }
   };
 
@@ -298,13 +300,13 @@ export default function App() {
       }
       const newStats = await api.getStats(activeCategory);
       setStats(newStats);
-      addToast(
+      addToast?.(
         updated.is_favorite 
           ? `Starred ${updated.casting_name}` 
           : `Unstarred ${updated.casting_name}`
       );
     } catch (err) {
-      alert('Failed to update favorite status');
+      console.error('Failed to update favorite status:', err);
     }
   };
 

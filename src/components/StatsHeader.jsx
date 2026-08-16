@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Layers, Star, Dices, Sparkles, PieChart, ArrowRight } from 'lucide-react';
-import { formatVND } from '../services/api';
+import { Layers, Star, Dices, Sparkles, PieChart, ArrowRight, Clock } from 'lucide-react';
+import { formatVND, formatRelativeOrDate, formatFullDateTime } from '../services/api';
 
 export default function StatsHeader({ stats, items = [], onSelectCar }) {
   const [highlightCar, setHighlightCar] = useState(null);
@@ -39,6 +39,17 @@ export default function StatsHeader({ stats, items = [], onSelectCar }) {
 
   const brandCount = Object.keys(stats.brand_breakdown || {}).length;
 
+  // Calculate latest update timestamp from items
+  const latestItem = items && items.length > 0
+    ? items.reduce((latest, it) => {
+        const t = new Date(it.updated_at || it.created_at || 0).getTime();
+        const curLatestT = new Date(latest?.updated_at || latest?.created_at || 0).getTime();
+        return t > curLatestT ? it : latest;
+      }, items[0])
+    : null;
+
+  const lastUpdatedTime = latestItem?.updated_at || latestItem?.created_at || null;
+
   return (
     <section className="stats-header">
       <div className="stats-grid">
@@ -51,9 +62,20 @@ export default function StatsHeader({ stats, items = [], onSelectCar }) {
             </div>
           </div>
           <div className="stat-number">{stats.total_count || 0} Models</div>
-          <div className="stat-sub">
-            <Star size={13} color="var(--apple-amber)" fill="var(--apple-amber)" />
-            <span>{stats.favorites_count || 0} starred favorites</span>
+          <div className="stat-sub" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.35rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <Star size={13} color="var(--apple-amber)" fill="var(--apple-amber)" />
+              <span>{stats.favorites_count || 0} starred</span>
+            </div>
+            {lastUpdatedTime && (
+              <span 
+                style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }} 
+                title={`Vault Last Updated: ${formatFullDateTime(lastUpdatedTime)}`}
+              >
+                <Clock size={11} color="#34d399" />
+                <span>Updated {formatRelativeOrDate(lastUpdatedTime)}</span>
+              </span>
+            )}
           </div>
         </div>
 

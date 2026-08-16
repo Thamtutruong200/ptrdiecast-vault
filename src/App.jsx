@@ -98,13 +98,32 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  const addToast = (message, type = 'success') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3500);
-  };
+  // Lock background scroll when any modal is open to keep header & footer 100% stable
+  const isAnyModalOpen = Boolean(
+    selectedItem || 
+    editingItem || 
+    isAddModalOpen || 
+    isExportImportOpen || 
+    isValuationInfoOpen || 
+    isAnalyticsOpen || 
+    isAdminLoginOpen || 
+    isAdminConsoleOpen || 
+    isExcelSheetOpen || 
+    certificateItem || 
+    isShowroomOpen || 
+    duplicateModalData
+  );
+
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isAnyModalOpen]);
 
   const showPrices = isAdmin || !auth.hidePricesInSpectator();
 

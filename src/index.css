@@ -1660,6 +1660,7 @@ textarea.form-control {
     overflow-x: hidden;
     position: relative;
     width: 100%;
+    overscroll-behavior-y: none;
   }
 
   body {
@@ -1678,11 +1679,10 @@ textarea.form-control {
   
   /* Scrollable Middle Container Offset */
   main.container {
-    padding-top: calc(62px + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    padding-top: calc(60px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
     padding-left: 0.85rem;
     padding-right: 0.85rem;
-    min-height: 100vh;
   }
 
   /* Compact Navbar */
@@ -1707,7 +1707,7 @@ textarea.form-control {
 
   /* Mobile Stats */
   .stats-header {
-    padding: 1rem 0 0.75rem;
+    padding: 0.75rem 0 0.5rem;
   }
   .stats-grid {
     grid-template-columns: 1fr 1fr;
@@ -1726,17 +1726,17 @@ textarea.form-control {
   /* Filter Bar on Mobile */
   .filter-bar {
     padding: 0.85rem 1rem;
-    margin-bottom: 1.15rem;
+    margin-bottom: 1rem;
   }
   .search-input {
     font-size: 16px; /* Prevents iOS Safari input auto-zoom */
   }
 
-  /* Items Grid Mobile: Luxury 2-Column Grid for Ultimate Comfort & Scanning */
+  /* Items Grid Mobile: Luxury 2-Column Grid */
   .items-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.65rem;
-    margin-bottom: 5.5rem; /* Room for bottom nav dock */
+    margin-bottom: 1rem;
   }
   .card-media {
     aspect-ratio: 4 / 3;

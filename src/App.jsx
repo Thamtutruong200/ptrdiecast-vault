@@ -574,6 +574,8 @@ export default function App() {
         {/* Admin Console Sheet Modal */}
         {isAdminConsoleOpen && (
           <AdminConsoleModal 
+            items={items}
+            stats={stats}
             onClose={() => setIsAdminConsoleOpen(false)}
             onSwitchToSpectator={() => {
               auth.logout();

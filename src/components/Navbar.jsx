@@ -100,35 +100,6 @@ export default function Navbar({
 
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {/* Global Currency Switcher */}
-          <select
-            className="currency-select-pill"
-            value={currency}
-            onChange={(e) => {
-              sound.playTap();
-              onCurrencyChange && onCurrencyChange(e.target.value);
-            }}
-            title="Convert currency (VND, USD, EUR, JPY, GBP)"
-            style={{
-              background: 'rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              borderRadius: 'var(--radius-pill)',
-              color: '#34d399',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              padding: '0.35rem 0.65rem',
-              cursor: 'pointer',
-              outline: 'none',
-              fontFamily: 'inherit'
-            }}
-          >
-            <option value="VND" style={{ background: '#121622', color: '#fff' }}>₫ VND</option>
-            <option value="USD" style={{ background: '#121622', color: '#fff' }}>$ USD</option>
-            <option value="EUR" style={{ background: '#121622', color: '#fff' }}>€ EUR</option>
-            <option value="JPY" style={{ background: '#121622', color: '#fff' }}>¥ JPY</option>
-            <option value="GBP" style={{ background: '#121622', color: '#fff' }}>£ GBP</option>
-          </select>
-
           {/* Museum Exhibition Mode */}
           <button
             type="button"

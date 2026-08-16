@@ -67,7 +67,7 @@ export default function Navbar({
           />
           <div className="brand-title">
             <span>PTR Motorsport</span>
-            <span className="brand-sub">Vault & Collectibles</span>
+            <span className="brand-sub">PTr's Collectibles System</span>
           </div>
         </div>
 

@@ -1767,15 +1767,15 @@ textarea.form-control {
     font-size: 0.82rem;
   }
 
-  /* Modals on Phone: Clean Top-Oriented Presentation */
+  /* Modals on Phone: Clean Top-Oriented Presentation (Below Notch & Clock) */
   .modal-overlay {
-    padding: max(0.5rem, env(safe-area-inset-top)) 0.65rem calc(0.75rem + env(safe-area-inset-bottom));
+    padding: max(2.75rem, calc(env(safe-area-inset-top, 0px) + 1.25rem)) 0.65rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
     align-items: flex-start; /* Top-oriented layout on phone */
   }
   .modal-content {
     max-width: 100%;
     width: 100%;
-    max-height: calc(100vh - max(0.85rem, env(safe-area-inset-top)) - max(0.85rem, env(safe-area-inset-bottom)));
+    max-height: calc(100vh - max(3.5rem, calc(env(safe-area-inset-top, 0px) + 2rem)) - max(0.85rem, env(safe-area-inset-bottom, 0px)));
     border-radius: 20px;
     border: var(--glass-border);
     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);

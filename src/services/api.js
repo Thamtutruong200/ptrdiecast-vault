@@ -425,7 +425,7 @@ export const api = {
     return { connected: false, source: 'local_fallback' };
   },
 
-  // Fetch Items by Category & Filters
+  // Fetch Items by Category & Filters (With Automatic Background Cloud Sync)
   async getItems(filters = {}, category = 'diecast') {
     const supabase = getSupabase();
     const deletedIds = getDeletedIds();
@@ -435,17 +435,37 @@ export const api = {
     if (supabase) {
       try {
         const { data, error } = await supabase.from('diecasts').select('*');
-        if (!error && Array.isArray(data) && data.length > 0) {
-          // Filter out any locally deleted IDs
-          items = data.filter(x => !deletedIds.includes(x.id));
+        if (!error && Array.isArray(data)) {
           isFromCloud = true;
           
-          // Merge any locally created items that haven't synced to cloud yet
+          // Auto-purge any blacklisted deleted items from Supabase in the background
+          if (deletedIds.length > 0) {
+            const staleRows = data.filter(x => deletedIds.includes(x.id));
+            if (staleRows.length > 0) {
+              staleRows.forEach(row => {
+                supabase.from('diecasts').delete().eq('id', row.id).then(() => {});
+              });
+            }
+          }
+
+          // Filter out deleted IDs
+          const cleanCloudItems = data.filter(x => !deletedIds.includes(x.id));
+
+          // Auto-upload any locally created items that haven't reached Supabase yet
           const local = loadLocalItems();
-          const cloudIds = new Set(items.map(x => x.id));
-          const localOnly = local.filter(x => !cloudIds.has(x.id) && !deletedIds.includes(x.id));
-          items = [...localOnly, ...items];
-          
+          const cloudIds = new Set(cleanCloudItems.map(x => x.id));
+          const unsyncedLocal = local.filter(x => !cloudIds.has(x.id) && !deletedIds.includes(x.id));
+
+          if (unsyncedLocal.length > 0) {
+            // Silently upload unsynced items to Supabase
+            unsyncedLocal.forEach(it => {
+              const validUUID = (it.id && it.id.includes('-') && it.id.length >= 32) ? it.id : generateUUID();
+              const uploadPayload = { ...it, id: validUUID };
+              supabase.from('diecasts').insert([uploadPayload]).then(() => {});
+            });
+          }
+
+          items = [...unsyncedLocal, ...cleanCloudItems];
           saveLocalItems(items);
         } else if (error) {
           console.warn('Supabase getItems notice:', error.message);
@@ -660,11 +680,12 @@ export const api = {
 
   // Delete Item
   async deleteItem(id) {
-    // 1. Blacklist ID so it can NEVER return in getItems
+    // 1. Blacklist ID so it can NEVER return locally
     addDeletedId(id);
 
     // 2. Remove from local store immediately
     const local = loadLocalItems();
+    const targetItem = local.find(x => x.id === id);
     const filtered = local.filter(x => x.id !== id);
     saveLocalItems(filtered);
 
@@ -672,9 +693,11 @@ export const api = {
     const supabase = getSupabase();
     if (supabase) {
       try {
+        // Attempt delete by ID
         const { error } = await supabase.from('diecasts').delete().eq('id', id);
-        if (error) {
-          console.warn('Supabase deleteItem notice:', error.message);
+        if (error && targetItem?.casting_name) {
+          // If ID was legacy format, fallback delete by casting_name & brand
+          await supabase.from('diecasts').delete().eq('casting_name', targetItem.casting_name).eq('brand', targetItem.brand);
         }
       } catch (e) {
         console.warn('Supabase delete exception:', e);
@@ -682,6 +705,65 @@ export const api = {
     }
 
     return true;
+  },
+
+  // 1-Click Master Cloud Sync: Push current local vault to Supabase so ALL devices match immediately
+  async syncLocalToCloud() {
+    const supabase = getSupabase();
+    if (!supabase) {
+      return { success: false, error: 'Supabase not connected' };
+    }
+
+    const localItems = loadLocalItems();
+    try {
+      // 1. Clear stale rows in Supabase
+      await supabase.from('diecasts').delete().neq('casting_name', '__dummy_impossible_name__');
+
+      // 2. Format items with valid UUIDs
+      const formatted = localItems.map(it => ({
+        id: (it.id && it.id.includes('-') && it.id.length >= 32) ? it.id : generateUUID(),
+        category: it.category || 'diecast',
+        brand: it.brand || 'Minichamps',
+        scale: it.scale || '1:64',
+        casting_name: it.casting_name || 'Model',
+        livery: it.livery || '',
+        color: it.color || '',
+        era: it.era || '',
+        condition: it.condition || 'Mint in Box',
+        purchase_price: Number(it.purchase_price) || 0,
+        current_value: Number(it.current_value) || 0,
+        valuation_source: it.valuation_source || 'Market Comps (eBay / Auctions)',
+        notes: it.notes || '',
+        photos: Array.isArray(it.photos) ? it.photos : [],
+        track_photos: Array.isArray(it.track_photos) ? it.track_photos : [],
+        reference_photos: Array.isArray(it.reference_photos) ? it.reference_photos : [],
+        is_favorite: Boolean(it.is_favorite),
+        created_at: it.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }));
+
+      // 3. Insert active local items
+      if (formatted.length > 0) {
+        const { error: insErr } = await supabase.from('diecasts').insert(formatted);
+        if (insErr) {
+          // If custom columns failed, try legacy
+          const legacy = formatted.map(f => {
+            const copy = { ...f };
+            delete copy.category;
+            delete copy.track_photos;
+            return copy;
+          });
+          await supabase.from('diecasts').insert(legacy);
+        }
+      }
+
+      // Update local storage with cleaned valid UUID items
+      saveLocalItems(formatted);
+      return { success: true, count: formatted.length };
+    } catch (e) {
+      console.error('syncLocalToCloud exception:', e);
+      return { success: false, error: e.message };
+    }
   },
 
   // Bulk Commit for Excel Spreadsheet Editor

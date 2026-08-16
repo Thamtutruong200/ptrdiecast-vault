@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Plus, Loader2, CheckCircle2, Smartphone, Monitor, Sparkles 
 } from 'lucide-react';
-import { api } from './services/api';
+import { api, getSupabase } from './services/api';
 import { sound } from './services/soundEffects';
 import { auth } from './services/auth';
 import { useDeviceDetect } from './hooks/useDeviceDetect';
@@ -156,6 +156,29 @@ export default function App() {
 
   useEffect(() => {
     loadData();
+  }, [loadData]);
+
+  // Realtime Live Synchronization across all devices (WebSockets)
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    const channel = supabase
+      .channel('realtime:diecasts-global')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'diecasts' },
+        () => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      try {
+        supabase.removeChannel(channel);
+      } catch (e) {}
+    };
   }, [loadData]);
 
   // Handle Save (Create or Update)

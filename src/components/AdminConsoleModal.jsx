@@ -140,7 +140,7 @@ export default function AdminConsoleModal({
                   <strong>Cloud Sync</strong>
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
-                  Supabase & CSV
+                  Supabase & Backup
                 </div>
               </button>
 
@@ -156,11 +156,42 @@ export default function AdminConsoleModal({
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--apple-purple)' }}>
                   <PieChart size={16} />
-                  <strong>Portfolio</strong>
+                  <strong>Analytics</strong>
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
-                  Valuation ROI
+                  Portfolio ROI stats
                 </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Master 1-Click Cloud Sync Banner */}
+          <div className="form-section-card" style={{ border: '1px solid rgba(10, 132, 255, 0.4)', background: 'linear-gradient(145deg, rgba(10, 132, 255, 0.12), rgba(18, 22, 34, 0.7))' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.85rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--apple-blue)', fontWeight: 700, fontSize: '0.9rem' }}>
+                  <Sparkles size={16} />
+                  <span>Sync Current Vault to All Devices</span>
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                  Force-pushes this browser's active collection to Supabase Cloud so all phones and computers match immediately.
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="btn btn-primary btn-sm"
+                onClick={async () => {
+                  sound.playStar();
+                  const res = await api.syncLocalToCloud();
+                  if (res.success) {
+                    alert(`✅ Successfully synced ${res.count} items to Supabase Cloud! All other devices will now see this exact collection.`);
+                  } else {
+                    alert(`Cloud sync notice: ${res.error}`);
+                  }
+                }}
+              >
+                <Database size={14} />
+                <span>Push to Cloud Now</span>
               </button>
             </div>
           </div>

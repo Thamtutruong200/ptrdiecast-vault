@@ -22,8 +22,8 @@ export default function AdminLoginModal({ onClose, onLoginSuccess }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" style={{ maxWidth: '400px', borderRadius: 'var(--radius-xl)' }} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay login-modal-overlay" onClick={onClose}>
+      <div className="modal-content login-modal-content" style={{ maxWidth: '400px', borderRadius: 'var(--radius-xl)' }} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>

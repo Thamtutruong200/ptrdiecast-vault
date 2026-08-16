@@ -71,8 +71,8 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* Center: Multi-Category Vault Switcher (Diecast vs Toys) */}
-        <div className="category-switcher-capsule">
+        {/* Center: Multi-Category Vault Switcher (Hidden on Mobile, lives in bottom dock) */}
+        <div className={`category-switcher-capsule ${isRealMobile ? 'hidden-on-mobile' : ''}`}>
           <button
             type="button"
             className={`category-tab-btn ${activeCategory === 'diecast' ? 'active' : ''}`}
@@ -100,20 +100,22 @@ export default function Navbar({
 
         {/* Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {/* Museum Exhibition Mode */}
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => {
-              sound.playSheetOpen();
-              onOpenShowroom && onOpenShowroom();
-            }}
-            title="Open Fullscreen Museum Kiosk Presentation (Shortcut: F)"
-            style={{ borderRadius: 'var(--radius-pill)', borderColor: 'rgba(212, 175, 55, 0.35)', color: '#d4af37' }}
-          >
-            <span>🏛️</span>
-            <span style={{ display: isRealMobile ? 'none' : 'inline' }}>Showroom</span>
-          </button>
+          {/* Museum Exhibition Mode (Desktop only, mobile has it in bottom nav) */}
+          {!isRealMobile && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => {
+                sound.playSheetOpen();
+                onOpenShowroom && onOpenShowroom();
+              }}
+              title="Open Fullscreen Museum Kiosk Presentation (Shortcut: F)"
+              style={{ borderRadius: 'var(--radius-pill)', borderColor: 'rgba(212, 175, 55, 0.35)', color: '#d4af37' }}
+            >
+              <span>🏛️</span>
+              <span>Showroom</span>
+            </button>
+          )}
 
           {/* Light / Dark Mode Toggle */}
           <ThemeToggle theme={theme} setTheme={setTheme} />

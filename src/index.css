@@ -157,6 +157,7 @@ body {
   border-bottom: var(--glass-border);
   box-shadow: var(--glass-specular);
   transition: background 0.3s ease;
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .navbar-inner {
@@ -1742,11 +1743,27 @@ textarea.form-control {
   .form-section-card {
     padding: 0.95rem;
   }
-  .form-control {
-    font-size: 16px; /* Prevents iOS Safari auto-zoom on focus */
-  }
   .modal-action-bar {
     padding: 0.85rem 1.15rem max(0.85rem, env(safe-area-inset-bottom));
+  }
+
+  .hidden-on-mobile {
+    display: none !important;
+  }
+
+  /* Admin Login Modal: Elevated & Centered on Mobile so virtual keyboard doesn't cover it */
+  .login-modal-overlay {
+    align-items: center !important;
+    justify-content: center !important;
+    padding-bottom: 24vh !important;
+  }
+
+  .login-modal-content {
+    max-width: 380px !important;
+    width: 92% !important;
+    border-radius: var(--radius-xl) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8) !important;
+    transform: translateY(-8vh) !important;
   }
 }
 

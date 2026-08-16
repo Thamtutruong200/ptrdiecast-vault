@@ -6,18 +6,26 @@ import { sound } from '../services/soundEffects';
 export default function AdminLoginModal({ onClose, onLoginSuccess }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    const res = auth.login(pin);
-    if (res.success) {
-      sound.playStar();
-      onLoginSuccess();
-      onClose();
-    } else {
-      sound.playTap();
-      setError(res.error || 'Access Denied: Incorrect Master Password');
+    setIsLoading(true);
+    try {
+      const res = await auth.login(pin);
+      if (res.success) {
+        sound.playStar();
+        onLoginSuccess();
+        onClose();
+      } else {
+        sound.playTap();
+        setError(res.error || 'Access Denied: Incorrect Master Password');
+      }
+    } catch (err) {
+      setError('Authentication check failed. Please check your connection.');
+    } finally {
+      setIsLoading(false);
     }
   };
 

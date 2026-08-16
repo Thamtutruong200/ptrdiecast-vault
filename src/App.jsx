@@ -178,6 +178,10 @@ export default function App() {
   }, [filters, activeCategory]);
 
   useEffect(() => {
+    auth.syncCloudPin();
+  }, []);
+
+  useEffect(() => {
     loadData();
   }, [loadData]);
 

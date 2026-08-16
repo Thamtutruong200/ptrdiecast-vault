@@ -155,7 +155,7 @@ export const api = {
           .order('created_at', { ascending: false });
 
         if (!error && Array.isArray(data)) {
-          items = data;
+          items = data.filter(x => x.category !== '_system_config_' && x.id !== '00000000-0000-0000-0000-000000000001');
         } else if (error) {
           console.error('Supabase getItems error:', error);
         }

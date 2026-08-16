@@ -54,15 +54,15 @@ export default function AdminConsoleModal({
     auth.setHidePricesInSpectator(val);
   };
 
-  const handleChangePin = (e) => {
+  const handleChangePin = async (e) => {
     e.preventDefault();
     setPinMessage(null);
     setPinError(null);
 
-    const res = auth.changePin(currentPin, newPin);
+    const res = await auth.changePin(currentPin, newPin);
     if (res.success) {
       sound.playStar();
-      setPinMessage('Master Password / PIN updated successfully!');
+      setPinMessage('Master Password / PIN updated & synchronized across all devices!');
       setCurrentPin('');
       setNewPin('');
     } else {

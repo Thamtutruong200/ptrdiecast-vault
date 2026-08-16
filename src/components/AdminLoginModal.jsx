@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { X, Lock, KeyRound, AlertCircle, ShieldCheck } from 'lucide-react';
+import { X, Lock, KeyRound, AlertCircle, Shield } from 'lucide-react';
 import { auth } from '../services/auth';
 import { sound } from '../services/soundEffects';
 
 export default function AdminLoginModal({ onClose, onLoginSuccess }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(null);
-  const isConfigured = auth.isPinConfigured();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,13 +17,13 @@ export default function AdminLoginModal({ onClose, onLoginSuccess }) {
       onClose();
     } else {
       sound.playTap();
-      setError(res.error || 'Invalid Master Password');
+      setError(res.error || 'Access Denied: Incorrect Master Password');
     }
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" style={{ maxWidth: '420px', borderRadius: 'var(--radius-xl)' }} onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content" style={{ maxWidth: '400px', borderRadius: 'var(--radius-xl)' }} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
@@ -48,7 +47,7 @@ export default function AdminLoginModal({ onClose, onLoginSuccess }) {
                 Owner Security Gate
               </div>
               <h2 style={{ fontSize: '1.15rem', color: 'var(--text-primary)', fontWeight: 700 }}>
-                {isConfigured ? 'Unlock Admin Console' : 'Set Master Password'}
+                Unlock Admin Console
               </h2>
             </div>
           </div>
@@ -58,11 +57,9 @@ export default function AdminLoginModal({ onClose, onLoginSuccess }) {
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="modal-body" style={{ gap: '1.25rem' }}>
+        <form onSubmit={handleSubmit} className="modal-body" style={{ gap: '1.15rem' }}>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-            {isConfigured 
-              ? 'Enter your Master Password / PIN to unlock the Admin Console (enables adding models, spreadsheet editor, and cloud sync).'
-              : 'Create your private Master Password / PIN to lock and protect your collection vault.'}
+            This vault is currently in read-only <strong>Spectator Mode</strong>. Enter the Owner Master Password / PIN to unlock editing, deletions, and adding models.
           </p>
 
           {error && (
@@ -74,7 +71,7 @@ export default function AdminLoginModal({ onClose, onLoginSuccess }) {
 
           <div>
             <label className="form-label" style={{ marginBottom: '0.4rem' }}>
-              <span>{isConfigured ? 'Master PIN / Password' : 'Create Master PIN (Min 4 chars)'}</span>
+              <span>Master Password / PIN</span>
             </label>
             <input 
               type="password"
@@ -83,19 +80,19 @@ export default function AdminLoginModal({ onClose, onLoginSuccess }) {
               value={pin}
               onChange={(e) => setPin(e.target.value)}
               autoFocus
-              maxLength={16}
-              style={{ textAlign: 'center', fontSize: '1.4rem', letterSpacing: '0.3em', padding: '0.6rem' }}
+              maxLength={24}
+              style={{ textAlign: 'center', fontSize: '1.3rem', letterSpacing: '0.25em', padding: '0.65rem' }}
               required
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onClose}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" style={{ flex: 1.5 }}>
               <KeyRound size={15} />
-              <span>{isConfigured ? 'Unlock Admin' : 'Set & Unlock'}</span>
+              <span>Unlock Admin</span>
             </button>
           </div>
         </form>

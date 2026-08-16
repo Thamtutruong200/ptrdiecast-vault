@@ -251,6 +251,12 @@ body {
   color: var(--text-secondary);
 }
 
+[data-theme="light"] .status-pill {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+}
+
 .status-dot {
   width: 7px;
   height: 7px;
@@ -392,6 +398,40 @@ body {
   background: var(--bg-glass-card-hover);
   border: var(--glass-border-hover);
   transform: translateY(-2px);
+}
+
+.stat-card-spotlight {
+  border: 1px solid rgba(10, 132, 255, 0.35);
+  background: linear-gradient(145deg, rgba(22, 24, 30, 0.75), rgba(10, 132, 255, 0.12));
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(10, 132, 255, 0.12);
+}
+
+[data-theme="light"] .stat-card-spotlight {
+  border: 1px solid rgba(10, 132, 255, 0.3);
+  background: linear-gradient(145deg, #ffffff 0%, rgba(10, 132, 255, 0.08) 100%);
+  box-shadow: 0 4px 18px rgba(10, 132, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card-spotlight:hover {
+  border-color: var(--apple-blue);
+  box-shadow: 0 6px 24px rgba(10, 132, 255, 0.2);
+}
+
+.spotlight-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #090b10;
+  border: var(--glass-border);
+  flex-shrink: 0;
+  box-shadow: var(--glass-specular);
+}
+
+[data-theme="light"] .spotlight-thumb {
+  background: #f0f2f5;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .stat-top {
@@ -1642,19 +1682,42 @@ textarea.form-control {
     font-size: 16px; /* Prevents iOS Safari input auto-zoom */
   }
 
-  /* Items Grid Mobile Ratio */
+  /* Items Grid Mobile: Luxury 2-Column Grid for Ultimate Comfort & Scanning */
   .items-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin-bottom: 5.5rem; /* Room for bottom nav dock */
   }
   .card-media {
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 4 / 3;
   }
   .card-body {
-    padding: 0.95rem;
+    padding: 0.65rem 0.65rem 0.75rem;
+  }
+  .card-title {
+    font-size: 0.82rem;
+    line-height: 1.25;
+    margin-bottom: 0.25rem;
+  }
+  .card-tags {
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+  .apple-tag {
+    padding: 0.12rem 0.35rem;
+    font-size: 0.62rem;
+  }
+  .card-footer {
+    padding-top: 0.45rem;
+  }
+  .price-title {
+    font-size: 0.58rem;
+  }
+  .price-amount {
+    font-size: 0.82rem;
   }
 
-  /* Modals on Phone */
+  /* Modals on Phone: True iOS Bottom Sheet */
   .modal-overlay {
     padding: 0;
     align-items: flex-end; /* Bottom sheet presentation on phone */
@@ -1662,21 +1725,22 @@ textarea.form-control {
   .modal-content {
     max-width: 100%;
     width: 100%;
-    max-height: 92vh;
-    border-radius: 22px 22px 0 0;
+    max-height: 90vh;
+    border-radius: 24px 24px 0 0;
     border-bottom: none;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
   }
   .modal-header {
-    padding: 1rem 1.15rem;
+    padding: 1rem 1.15rem 0.75rem;
   }
   .modal-body {
-    padding: 1.15rem;
+    padding: 1rem 1.15rem;
   }
   .form-body-custom {
     padding: 1rem;
   }
   .form-section-card {
-    padding: 1rem;
+    padding: 0.95rem;
   }
   .form-control {
     font-size: 16px; /* Prevents iOS Safari auto-zoom on focus */
@@ -1684,27 +1748,120 @@ textarea.form-control {
   .modal-action-bar {
     padding: 0.85rem 1.15rem max(0.85rem, env(safe-area-inset-bottom));
   }
+}
 
-  /* Mobile Floating Action Button */
-  .mobile-fab {
+/* ============================================================================
+   MOBILE BOTTOM NAVIGATION DOCK (iOS Haptic Frosted Glass Dock)
+   ============================================================================ */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: block;
     position: fixed;
-    bottom: calc(1.5rem + env(safe-area-inset-bottom));
-    right: 1.25rem;
-    z-index: 80;
-    width: 56px;
-    height: 56px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    background: rgba(10, 14, 22, 0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.5);
+  }
+
+  [data-theme="light"] .mobile-bottom-nav {
+    background: rgba(255, 255, 255, 0.92);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+  }
+
+  .mobile-nav-inner {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 58px;
+    padding: 0 0.5rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--apple-blue);
+  }
+
+  .mobile-nav-item.active-admin {
+    color: #34d399;
+  }
+
+  .mobile-nav-icon {
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+
+  .mobile-nav-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .mobile-nav-fab {
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: linear-gradient(145deg, #0a84ff, #0071e3);
+    background: linear-gradient(135deg, #0a84ff, #0071e3);
     color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: 0 8px 24px rgba(10, 132, 255, 0.55), var(--glass-specular-bright);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(10, 132, 255, 0.55);
+    cursor: pointer;
+    transform: translateY(-8px);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-fab:active {
+    transform: translateY(-5px) scale(0.94);
+  }
+
+  .mobile-nav-fab-spectator {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(255, 215, 0, 0.12));
+    border: 1px solid rgba(212, 175, 55, 0.45);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(-6px);
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+    -webkit-tap-highlight-color: transparent;
   }
-  .mobile-fab:active {
-    transform: scale(0.92);
+
+  .mobile-nav-fab-spectator:active {
+    transform: translateY(-4px) scale(0.94);
   }
 }

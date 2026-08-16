@@ -79,13 +79,8 @@ export default function StatsHeader({ stats, items = [], onSelectCar }) {
 
         {/* Card 3: Highlight Random Car from Collection */}
         <div 
-          className="stat-card" 
+          className="stat-card stat-card-spotlight" 
           onClick={() => highlightCar && onSelectCar && onSelectCar(highlightCar)}
-          style={{ 
-            cursor: highlightCar ? 'pointer' : 'default',
-            border: '1px solid rgba(10, 132, 255, 0.3)',
-            background: 'linear-gradient(145deg, rgba(22, 24, 30, 0.65), rgba(10, 132, 255, 0.1))'
-          }}
           title={highlightCar ? `Click to view ${highlightCar.casting_name}` : 'Vault Spotlight'}
         >
           <div className="stat-top">
@@ -112,18 +107,7 @@ export default function StatsHeader({ stats, items = [], onSelectCar }) {
           {highlightCar ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.2rem' }}>
               {/* Mini Thumbnail */}
-              <div 
-                style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  borderRadius: 'var(--radius-sm)', 
-                  overflow: 'hidden', 
-                  background: '#090b10', 
-                  border: 'var(--glass-border)',
-                  flexShrink: 0,
-                  boxShadow: 'var(--glass-specular)'
-                }}
-              >
+              <div className="spotlight-thumb">
                 <img 
                   src={highlightPhoto} 
                   alt={highlightCar.casting_name} 

@@ -24,6 +24,7 @@ import ExcelSheetModal from './components/ExcelSheetModal';
 import IntroSequence from './components/IntroSequence';
 import CollectorCertificateModal from './components/CollectorCertificateModal';
 import MuseumShowroomModal from './components/MuseumShowroomModal';
+import MobileBottomNav from './components/MobileBottomNav';
 import { getSavedCurrency, saveCurrency } from './services/currency';
 import ptrLogo from './assets/ptr-logo.png';
 
@@ -455,21 +456,22 @@ export default function App() {
           )}
         </main>
 
-        {/* Mobile Floating Action Button (Only for Admin) */}
-        {isMobile && isAdmin && (
-          <button 
-            type="button"
-            className="mobile-fab"
-            onClick={() => {
-              sound.playSheetOpen();
-              setEditingItem(null);
-              setIsAddModalOpen(true);
-            }}
-            title="Add Model from Phone"
-          >
-            <Plus size={26} strokeWidth={2.5} />
-          </button>
-        )}
+        {/* iOS-Style Luxury Mobile Bottom Navigation Dock */}
+        <MobileBottomNav 
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+          filters={filters}
+          setFilters={setFilters}
+          onOpenShowroom={() => setIsShowroomOpen(true)}
+          onOpenAnalytics={() => setIsAnalyticsOpen(true)}
+          onOpenAdminConsole={() => setIsAdminConsoleOpen(true)}
+          onOpenAdminLogin={() => setIsAdminLoginOpen(true)}
+          onOpenAdd={() => {
+            setEditingItem(null);
+            setIsAddModalOpen(true);
+          }}
+          isAdmin={isAdmin}
+        />
 
         {/* Live Excel-Style Spreadsheet Data Editor */}
         {isExcelSheetOpen && (

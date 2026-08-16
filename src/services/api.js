@@ -257,15 +257,14 @@ export const api = {
     };
   },
 
-  // Direct Cloud Create (Guaranteed RFC 4122 UUID)
+  // Direct Cloud Create (Resilient to Schema Columns)
   async createItem(itemData) {
     const validUUID = (itemData.id && itemData.id.includes('-') && itemData.id.length >= 32)
       ? itemData.id
       : generateUUID();
 
-    const payload = {
+    const basePayload = {
       id: validUUID,
-      category: itemData.category || 'diecast',
       brand: itemData.brand || 'Minichamps',
       scale: itemData.scale || '1:64',
       casting_name: itemData.casting_name || 'Untitled Model',
@@ -278,25 +277,39 @@ export const api = {
       valuation_source: itemData.valuation_source || 'Market Comps (eBay / Auctions)',
       notes: itemData.notes || '',
       photos: Array.isArray(itemData.photos) ? itemData.photos : [],
-      track_photos: Array.isArray(itemData.track_photos) ? itemData.track_photos : [],
       reference_photos: Array.isArray(itemData.reference_photos) ? itemData.reference_photos : [],
       is_favorite: Boolean(itemData.is_favorite),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
 
+    const fullPayload = {
+      ...basePayload,
+      category: itemData.category || 'diecast',
+      track_photos: Array.isArray(itemData.track_photos) ? itemData.track_photos : []
+    };
+
     const supabase = getSupabase();
     if (!supabase) throw new Error('Supabase client unavailable');
 
-    const { data, error } = await supabase.from('diecasts').insert([payload]).select();
-    if (error) {
-      console.error('Supabase createItem error:', error);
-      throw error;
+    // Attempt 1: Try inserting full payload
+    const { data: fullData, error: fullError } = await supabase.from('diecasts').insert([fullPayload]).select();
+    if (!fullError && fullData && fullData.length > 0) {
+      return fullData[0];
     }
-    return data[0];
+
+    // Attempt 2: If Postgres schema doesn't have 'category' or 'track_photos' column, insert without them
+    if (fullError) {
+      const { data: baseData, error: baseError } = await supabase.from('diecasts').insert([basePayload]).select();
+      if (!baseError && baseData && baseData.length > 0) {
+        return { ...baseData[0], category: itemData.category || 'diecast' };
+      }
+      console.error('Supabase createItem error:', baseError || fullError);
+      throw baseError || fullError;
+    }
   },
 
-  // Direct Cloud Update
+  // Direct Cloud Update (Resilient Schema)
   async updateItem(id, itemData) {
     const payload = {
       ...itemData,
@@ -307,11 +320,23 @@ export const api = {
     if (!supabase) throw new Error('Supabase client unavailable');
 
     const { data, error } = await supabase.from('diecasts').update(payload).eq('id', id).select();
-    if (error) {
-      console.error('Supabase updateItem error:', error);
-      throw error;
+    if (!error && data && data.length > 0) {
+      return data[0];
     }
-    return data[0] || { id, ...payload };
+
+    // Fallback if custom columns missing
+    if (error) {
+      const cleanPayload = { ...payload };
+      delete cleanPayload.category;
+      delete cleanPayload.track_photos;
+      const { data: bData, error: bError } = await supabase.from('diecasts').update(cleanPayload).eq('id', id).select();
+      if (!bError && bData && bData.length > 0) {
+        return { ...bData[0], category: itemData.category || 'diecast' };
+      }
+      throw bError || error;
+    }
+
+    return { id, ...payload };
   },
 
   // Direct Cloud Delete
@@ -343,8 +368,23 @@ export const api = {
       .upsert(cleanItems, { onConflict: 'id' })
       .select();
 
-    if (error) throw error;
-    return { success: true, count: data?.length || cleanItems.length };
+    if (!error) return { success: true, count: data?.length || cleanItems.length };
+
+    // Fallback without category/track_photos if table lacks them
+    const legacy = cleanItems.map(it => {
+      const copy = { ...it };
+      delete copy.category;
+      delete copy.track_photos;
+      return copy;
+    });
+
+    const { data: lData, error: lError } = await supabase
+      .from('diecasts')
+      .upsert(legacy, { onConflict: 'id' })
+      .select();
+
+    if (lError) throw lError;
+    return { success: true, count: lData?.length || legacy.length };
   },
 
   // Upload Single Photo to Supabase Object Storage

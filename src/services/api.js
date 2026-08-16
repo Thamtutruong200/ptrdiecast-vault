@@ -1,9 +1,8 @@
-/**
- * DIECAST & TOYS TRACKER API CLIENT (SUPABASE DUAL CLIENT)
- * Supports Diecast Models + Toys & Collectibles with live spreadsheet bulk commits
- */
-
 import { createClient } from '@supabase/supabase-js';
+
+// Built-in Production Supabase Credentials (Unified Cloud Database)
+const BUILTIN_SUPABASE_URL = 'https://kzrmijhrokdrjmivvxql.supabase.co';
+const BUILTIN_SUPABASE_ANON_KEY = 'sb_publishable_HtcJhl5ghYUEhzC3ZyQVrQ_3XFJ4-YA';
 
 function getSupabaseConfig() {
   const envUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL || '';
@@ -15,8 +14,8 @@ function getSupabaseConfig() {
     if (saved) localConfig = JSON.parse(saved);
   } catch (e) {}
 
-  const url = localConfig.url || envUrl || '';
-  const key = localConfig.key || envKey || '';
+  const url = localConfig.url || envUrl || BUILTIN_SUPABASE_URL;
+  const key = localConfig.key || envKey || BUILTIN_SUPABASE_ANON_KEY;
   const isConfigured = Boolean(url && key && !url.includes('your-project'));
 
   return { url, key, isConfigured };
@@ -50,236 +49,8 @@ export function clearSupabaseConfig() {
   supabaseInstance = null;
 }
 
-// Master Seed Database: Diecast + Toys & Collectibles
-let MOCK_DATA = [
-  // --- 🏎️ DIECAST VAULT ITEMS ---
-  {
-    id: "m1a2c3d4-minichamps-18-porsche-gt3rs",
-    category: "diecast",
-    brand: "Minichamps",
-    scale: "1:18",
-    casting_name: "Porsche 911 (992) GT3 RS",
-    livery: "Weissach Package / Pyro Red Accents",
-    color: "Ice Grey Metallic / Pyro Red Wheels",
-    era: "Modern Supercar",
-    condition: "Mint in Box",
-    purchase_price: 4200000,
-    current_value: 7800000,
-    valuation_source: "Market Comps (eBay Sold / European Auctions)",
-    notes: "Limited edition of 504 pieces worldwide. Full diecast metal body with opening doors, active aero DRS wing replica, and detailed carbon Weissach weave.",
-    photos: ["https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1200&q=80"],
-    track_photos: [
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80"
-    ],
-    reference_photos: [],
-    is_favorite: true,
-    created_at: "2024-05-12T10:00:00Z",
-    updated_at: "2024-05-12T10:00:00Z"
-  },
-  {
-    id: "m2b3c4d5-minichamps-43-redbull-rb19",
-    category: "diecast",
-    brand: "Minichamps",
-    scale: "1:43",
-    casting_name: "Oracle Red Bull Racing RB19",
-    livery: "Max Verstappen #1 World Champion 2023",
-    color: "Matte Navy / Yellow & Red Bull Bull",
-    era: "2023 Formula 1",
-    condition: "Mint in Box",
-    purchase_price: 1950000,
-    current_value: 3400000,
-    valuation_source: "HobbyDB & F1 Collector Index",
-    notes: "Record-breaking 19 wins in a single season. Includes driver figure standing on halo, pitboard #1 World Champion, and custom acrylic display plinth.",
-    photos: ["https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1200&q=80"],
-    track_photos: [
-      "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1200&q=80"
-    ],
-    reference_photos: [],
-    is_favorite: true,
-    created_at: "2024-05-01T15:00:00Z",
-    updated_at: "2024-05-01T15:00:00Z"
-  },
-  {
-    id: "c1f7b764-839e-4c7b-b83b-9a72d3f74011",
-    category: "diecast",
-    brand: "Hot Wheels RLC",
-    scale: "1:64",
-    casting_name: "Nissan Skyline GT-R (BNR34)",
-    livery: "Nismo Clubman Race Spec",
-    color: "Spectraflame Chameleon",
-    era: "1990s JDM",
-    condition: "Mint in Box",
-    purchase_price: 1250000,
-    current_value: 2800000,
-    valuation_source: "Market Comps (eBay Sold & Yahoo Japan)",
-    notes: "Numbered 04821/25000. Real Riders rubber tires, opening hood with RB26DETT twin-turbo engine detail.",
-    photos: ["https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=80"],
-    track_photos: [
-      "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80"
-    ],
-    reference_photos: [],
-    is_favorite: true,
-    created_at: "2024-01-15T10:00:00Z",
-    updated_at: "2024-01-15T10:00:00Z"
-  },
-  {
-    id: "d2e8c875-94af-5d8c-c94c-ab83e4a85122",
-    category: "diecast",
-    brand: "Mini GT",
-    scale: "1:64",
-    casting_name: "Porsche 911 GT3 R",
-    livery: "Pfaff Motorsports #9 'Plaid GT3'",
-    color: "Red / Black Plaid Pattern",
-    era: "Modern IMSA GTD",
-    condition: "Mint in Box",
-    purchase_price: 380000,
-    current_value: 650000,
-    valuation_source: "Recent Collector Transactions (Mini GT Vietnam Hub)",
-    notes: "IMSA WeatherTech SportsCar Championship 2021 Sebring 12h Class Winner.",
-    photos: ["https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80"],
-    track_photos: [
-      "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80"
-    ],
-    reference_photos: [],
-    is_favorite: true,
-    created_at: "2024-02-10T14:30:00Z",
-    updated_at: "2024-02-10T14:30:00Z"
-  },
-  {
-    id: "f4a0ea97-16cb-7fae-eb6e-cda5a6ca7344",
-    category: "diecast",
-    brand: "AUTOart",
-    scale: "1:18",
-    casting_name: "Mazda 787B",
-    livery: "Renown Charge #55",
-    color: "Green / Orange Argyle Renown",
-    era: "1991 Le Mans Group C",
-    condition: "Mint in Box",
-    purchase_price: 6800000,
-    current_value: 11500000,
-    valuation_source: "Appraisal & High-End Auction Comps",
-    notes: "1991 24 Hours of Le Mans overall winner. Iconic 4-rotor R26B engine replica with fully removable rear cowl and working suspension.",
-    photos: ["https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1200&q=80"],
-    track_photos: [
-      "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1200&q=80"
-    ],
-    reference_photos: [],
-    is_favorite: true,
-    created_at: "2024-03-20T16:45:00Z",
-    updated_at: "2024-03-20T16:45:00Z"
-  },
-  {
-    id: "a5b1fb08-27dc-8abf-fc7f-deb6b7db8455",
-    category: "diecast",
-    brand: "Spark",
-    scale: "1:43",
-    casting_name: "Porsche 956",
-    livery: "Rothmans Racing #1",
-    color: "Blue / White / Gold Racing",
-    era: "1982 Le Mans",
-    condition: "Loose Mint",
-    purchase_price: 1850000,
-    current_value: 2600000,
-    valuation_source: "Market Comps (European Resin Models Guide)",
-    notes: "Driven by Jacky Ickx & Derek Bell. High-precision resin casting with aerodynamic ground-effect underbody detail.",
-    photos: ["https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1200&q=80"],
-    track_photos: [
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80"
-    ],
-    reference_photos: [],
-    is_favorite: false,
-    created_at: "2024-04-05T11:20:00Z",
-    updated_at: "2024-04-05T11:20:00Z"
-  },
-
-  // --- 🧸 TOYS & COLLECTIBLES VAULT ITEMS ---
-  {
-    id: "toy-lego-porsche-gt3rs",
-    category: "toys",
-    brand: "Lego",
-    scale: "1:8",
-    casting_name: "LEGO Technic Porsche 911 GT3 RS (42056)",
-    livery: "Lava Orange Flagship Ultimate Series",
-    color: "Lava Orange",
-    era: "Technic Supercar",
-    condition: "Mint in Sealed Box",
-    purchase_price: 8500000,
-    current_value: 18500000,
-    valuation_source: "BrickEconomy & eBay Sold Comps",
-    notes: "Retired 2,704 piece master set. Features functioning dual-clutch transmission with paddle shifters and working boxer 6 engine.",
-    photos: ["https://images.unsplash.com/photo-1585366119957-e9730b6d0f60?auto=format&fit=crop&w=1200&q=80"],
-    track_photos: [],
-    reference_photos: [],
-    is_favorite: true,
-    created_at: "2024-02-15T12:00:00Z",
-    updated_at: "2024-02-15T12:00:00Z"
-  },
-  {
-    id: "toy-gundam-pg-rx782",
-    category: "toys",
-    brand: "Gundam / Bandai",
-    scale: "1:60",
-    casting_name: "Perfect Grade Unleashed RX-78-2 Gundam",
-    livery: "Mobile Suit Gundam 0079",
-    color: "White / Blue / Red / Yellow",
-    era: "Master Grade / PG",
-    condition: "Mint in Sealed Box",
-    purchase_price: 5200000,
-    current_value: 7500000,
-    valuation_source: "Bandai Collector Index",
-    notes: "Multi-layered internal truss frame with chrome etched metal parts, LED lighting core block system, and magnetic hatch gimmicks.",
-    photos: ["https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=1200&q=80"],
-    track_photos: [],
-    reference_photos: [],
-    is_favorite: true,
-    created_at: "2024-03-01T10:00:00Z",
-    updated_at: "2024-03-01T10:00:00Z"
-  },
-  {
-    id: "toy-bearbrick-400-daftpunk",
-    category: "toys",
-    brand: "Medicom Bearbrick",
-    scale: "400%",
-    casting_name: "BE@RBRICK Daft Punk (Discovery Guy-Manuel)",
-    livery: "Discovery Era Chrome Helmet",
-    color: "High Gloss Gold & Chrome",
-    era: "Designer Art Toy",
-    condition: "Mint in Box",
-    purchase_price: 6000000,
-    current_value: 14000000,
-    valuation_source: "StockX & Sotheby's Designer Comps",
-    notes: "Authentic Medicom Toy Japan release. Features iconic helmet visor details and mirror-like chrome electroplated finish.",
-    photos: ["https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=1200&q=80"],
-    track_photos: [],
-    reference_photos: [],
-    is_favorite: true,
-    created_at: "2024-01-20T16:00:00Z",
-    updated_at: "2024-01-20T16:00:00Z"
-  },
-  {
-    id: "toy-popmart-mega-space-molly",
-    category: "toys",
-    brand: "Pop Mart",
-    scale: "400%",
-    casting_name: "MEGA SPACE MOLLY 400% Planet Series",
-    livery: "Limited Astronaut Edition",
-    color: "Iridescent Pearl White",
-    era: "Art Vinyl Toy",
-    condition: "Mint in Box",
-    purchase_price: 3900000,
-    current_value: 6200000,
-    valuation_source: "Pop Mart Collectibles Exchange",
-    notes: "Equipped with removable astronaut helmet visor, space blaster camera, and collector authentication NFC card.",
-    photos: ["https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80"],
-    track_photos: [],
-    reference_photos: [],
-    is_favorite: false,
-    created_at: "2024-04-10T09:30:00Z",
-    updated_at: "2024-04-10T09:30:00Z"
-  }
-];
+// Default local mock data (empty by default so Supabase cloud is the single source of truth)
+let MOCK_DATA = [];
 
 export function formatVND(amount) {
   if (amount === undefined || amount === null || isNaN(amount)) return '0 ₫';

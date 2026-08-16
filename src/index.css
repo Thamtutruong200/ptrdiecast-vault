@@ -4,62 +4,63 @@
    ============================================================================ */
 
 :root {
-  /* Dark Theme Tokens (Default) */
-  --bg-base: #06080d;
-  --bg-surface: rgba(18, 22, 34, 0.75);
-  --bg-surface-elevated: rgba(26, 32, 50, 0.85);
-  --bg-glass-card: rgba(14, 18, 28, 0.7);
-  --bg-glass-card-hover: rgba(22, 28, 44, 0.85);
+  /* Dark Theme Tokens (Space Black VisionOS) */
+  --bg-base: #07090e;
+  --bg-surface: rgba(15, 20, 32, 0.78);
+  --bg-surface-elevated: rgba(22, 28, 46, 0.88);
+  --bg-glass-card: rgba(15, 20, 32, 0.72);
+  --bg-glass-card-hover: rgba(24, 32, 54, 0.88);
   
-  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-  --glass-border-hover: 1px solid rgba(255, 255, 255, 0.18);
-  --glass-specular: inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
-  --glass-specular-bright: inset 0 1px 2px 0 rgba(255, 255, 255, 0.25);
-  --glass-blur: blur(28px) saturate(190%);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.09);
+  --glass-border-hover: 1px solid rgba(255, 255, 255, 0.22);
+  --glass-specular: inset 0 1px 1px 0 rgba(255, 255, 255, 0.14);
+  --glass-specular-bright: inset 0 1px 2px 0 rgba(255, 255, 255, 0.28);
+  --glass-blur: blur(32px) saturate(190%);
   
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-tertiary: #64748b;
   --separator: rgba(255, 255, 255, 0.08);
 
-  /* Apple HSL Accent Palette */
+  /* Apple VisionOS HSL Accent Palette */
   --apple-blue: #0a84ff;
-  --apple-blue-dim: rgba(10, 132, 255, 0.18);
+  --apple-blue-dim: rgba(10, 132, 255, 0.16);
+  --apple-blue-glow: 0 0 20px rgba(10, 132, 255, 0.35);
   --apple-green: #30d158;
-  --apple-green-dim: rgba(48, 209, 88, 0.18);
+  --apple-green-dim: rgba(48, 209, 88, 0.16);
   --apple-amber: #ffd60a;
   --apple-orange: #ff9f0a;
   --apple-purple: #bf5af2;
   --apple-red: #ff453a;
 
   /* Typography & Radii */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
-  --font-mono: "SF Mono", Menlo, Monaco, Consolas, monospace;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Monaco, Consolas, monospace;
   
   --radius-xs: 6px;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
-  --radius-xl: 26px;
+  --radius-xl: 28px;
   --radius-pill: 9999px;
 
-  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.35);
-  --shadow-elevated: 0 12px 36px rgba(0, 0, 0, 0.55);
+  --shadow-subtle: 0 4px 24px -1px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 16px 48px -4px rgba(0, 0, 0, 0.65);
 }
 
-/* Light Theme: Apple Daylight Studio Frosted Glass */
+/* Light Theme: Apple Daylight Studio Frosted Porcelain */
 [data-theme="light"] {
-  --bg-base: #f1f5f9;
-  --bg-surface: rgba(255, 255, 255, 0.85);
-  --bg-surface-elevated: rgba(255, 255, 255, 0.95);
-  --bg-glass-card: rgba(255, 255, 255, 0.75);
-  --bg-glass-card-hover: rgba(255, 255, 255, 0.92);
+  --bg-base: #f6f8fa;
+  --bg-surface: rgba(255, 255, 255, 0.88);
+  --bg-surface-elevated: rgba(255, 255, 255, 0.96);
+  --bg-glass-card: rgba(255, 255, 255, 0.82);
+  --bg-glass-card-hover: rgba(255, 255, 255, 0.98);
   
-  --glass-border: 1px solid rgba(0, 0, 0, 0.08);
-  --glass-border-hover: 1px solid rgba(10, 132, 255, 0.35);
-  --glass-specular: inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
+  --glass-border: 1px solid rgba(0, 0, 0, 0.07);
+  --glass-border-hover: 1px solid rgba(0, 113, 227, 0.35);
+  --glass-specular: inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
   --glass-specular-bright: inset 0 1px 2px 0 rgba(255, 255, 255, 1);
-  --glass-blur: blur(28px) saturate(180%);
+  --glass-blur: blur(32px) saturate(180%);
   
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -68,12 +69,13 @@
 
   --apple-blue: #0071e3;
   --apple-blue-dim: rgba(0, 113, 227, 0.12);
+  --apple-blue-glow: 0 0 18px rgba(0, 113, 227, 0.25);
   --apple-green: #10b981;
   --apple-green-dim: rgba(16, 185, 129, 0.12);
   --apple-amber: #d97706;
 
-  --shadow-subtle: 0 4px 18px rgba(0, 0, 0, 0.06);
-  --shadow-elevated: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-elevated: 0 14px 38px rgba(0, 0, 0, 0.09);
 }
 
 *, *::before, *::after {
@@ -265,31 +267,41 @@ body {
 }
 
 /* ============================================================================
-   BUTTONS & CONTROLS
+   BUTTONS & CONTROLS (Apple Tactile Feel)
    ============================================================================ */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.55rem 1.15rem;
+  padding: 0.55rem 1.25rem;
   border-radius: var(--radius-pill);
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   border: none;
+  letter-spacing: -0.01em;
+  user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.965);
 }
 
 .btn-primary {
   background: linear-gradient(145deg, #0a84ff, #0071e3);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(10, 132, 255, 0.35), var(--glass-specular-bright);
+  box-shadow: 0 4px 16px rgba(10, 132, 255, 0.38), var(--glass-specular-bright);
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(10, 132, 255, 0.5), var(--glass-specular-bright);
+  box-shadow: 0 6px 22px rgba(10, 132, 255, 0.55), var(--glass-specular-bright);
+}
+
+.btn-primary:active {
+  transform: scale(0.965) translateY(0);
 }
 
 .btn-secondary {
@@ -302,17 +314,22 @@ body {
 .btn-secondary:hover {
   background: var(--bg-glass-card-hover);
   border: var(--glass-border-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: scale(0.965);
 }
 
 .btn-sm {
-  padding: 0.35rem 0.75rem;
+  padding: 0.35rem 0.8rem;
   font-size: 0.78rem;
 }
 
 .btn-icon {
   padding: 0;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
 }
 
@@ -328,7 +345,15 @@ body {
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.device-toggle-pill:hover {
+  border-color: var(--glass-border-hover);
+}
+
+.device-toggle-pill:active {
+  transform: scale(0.96);
 }
 
 .device-toggle-pill.active-desktop {
@@ -499,17 +524,30 @@ body {
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-subtle), var(--glass-specular);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              background 0.25s ease, 
+              border-color 0.25s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .item-card:hover {
   background: var(--bg-glass-card-hover);
-  border: var(--glass-border-hover);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-elevated), 0 0 24px rgba(10, 132, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-elevated), 0 0 28px rgba(10, 132, 255, 0.16), var(--glass-specular-bright);
+}
+
+.item-card:active {
+  transform: translateY(-2px) scale(0.985);
+}
+
+[data-theme="light"] .item-card:hover {
+  border-color: rgba(0, 113, 227, 0.38);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 113, 227, 0.12);
 }
 
 .card-media {
@@ -524,11 +562,11 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .item-card:hover .card-image {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
 .scale-pill-badge {

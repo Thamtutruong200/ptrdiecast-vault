@@ -171,8 +171,10 @@ export default function ShowcaseStage({ items, onSelectCar, onToggleFavorite, sh
                 </div>
 
                 <div style={{ textAlign: 'right' }}>
-                  <div className="price-title">Est. Valuation</div>
-                  <div className="price-amount highlight" style={{ fontSize: '1.25rem' }}>{formatVND(currentCar.current_value)}</div>
+                  <div className="price-title">Collection Value</div>
+                  <div className="price-amount highlight" style={{ fontSize: '1.25rem' }}>
+                    {formatVND((currentCar.current_value && currentCar.current_value > 0) ? currentCar.current_value : currentCar.purchase_price)}
+                  </div>
                   <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600 }}>
                     {isPositive ? '+' : ''}{profitPct}% ({isPositive ? '+' : ''}{formatVND(profit)})
                   </div>

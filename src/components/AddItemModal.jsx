@@ -198,11 +198,14 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
       return;
     }
 
+    const finalPaid = Number(formData.purchase_price) || 0;
+    const finalVal = Number(formData.current_value) || finalPaid;
+
     onSave({
       ...formData,
       category: activeCategory,
-      purchase_price: Number(formData.purchase_price) || 0,
-      current_value: Number(formData.current_value) || 0,
+      purchase_price: finalPaid,
+      current_value: finalVal,
     });
   };
 
@@ -595,7 +598,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
               {/* Market Valuation */}
               <div className="form-group">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                  <label className="form-label" style={{ margin: 0 }}>Estimated Valuation (VND ₫)</label>
+                  <label className="form-label" style={{ margin: 0 }}>Collection Value (VND ₫)</label>
                   {onOpenValuationInfo && (
                     <button
                       type="button"
@@ -612,11 +615,11 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                   step="10000"
                   className="form-control font-mono"
                   value={formData.current_value || ''}
-                  placeholder="0"
+                  placeholder="Leave blank to match Paid Price"
                   onChange={(e) => setFormData({ ...formData, current_value: Number(e.target.value) })}
                 />
                 <div style={{ fontSize: '0.75rem', color: '#34d399', marginTop: '0.2rem', fontWeight: 700 }}>
-                  Market Value: {formatVND(formData.current_value)}
+                  Collection Value: {formatVND(formData.current_value || formData.purchase_price || 0)}
                 </div>
               </div>
 

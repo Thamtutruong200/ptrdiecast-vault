@@ -210,9 +210,9 @@ export default function ItemDetailModal({
                     </div>
 
                     <div style={{ textAlign: 'right' }}>
-                      <div className="price-title">Est. Market Value</div>
+                      <div className="price-title">Collection Value</div>
                       <div className="price-amount highlight" style={{ fontSize: '1.35rem', marginTop: '0.2rem' }}>
-                        {formatCurrency(item.current_value, currency)}
+                        {formatCurrency((item.current_value && item.current_value > 0) ? item.current_value : item.purchase_price, currency)}
                       </div>
                     </div>
                   </div>

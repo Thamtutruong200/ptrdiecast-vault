@@ -22,7 +22,7 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
             {showPrices && (
               <>
                 <th style={{ width: '130px', textAlign: 'right' }}>Cost Paid</th>
-                <th style={{ width: '130px', textAlign: 'right' }}>Est. Value</th>
+                <th style={{ width: '130px', textAlign: 'right' }}>Value</th>
               </>
             )}
             <th style={{ width: isAdmin ? '100px' : '60px', textAlign: 'center' }}>Actions</th>
@@ -34,7 +34,8 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
               ? item.photos[0]
               : 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=120&q=80';
 
-            const profit = (item.current_value || 0) - (item.purchase_price || 0);
+            const effectiveValue = (item.current_value && item.current_value > 0) ? item.current_value : (item.purchase_price || 0);
+            const profit = effectiveValue - (item.purchase_price || 0);
             const isPositive = profit >= 0;
 
             return (
@@ -48,29 +49,24 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
                       sound.playStar();
                       onToggleFavorite(item);
                     }}
-                    title={item.is_favorite ? 'Unstar' : 'Star favorite'}
+                    title={item.is_favorite ? 'Favorited' : 'Add to Favorites'}
                   >
-                    <Star size={12} fill={item.is_favorite ? 'currentColor' : 'none'} />
+                    <Star size={13} fill={item.is_favorite ? 'currentColor' : 'none'} />
                   </button>
                 </td>
 
-                {/* Tiny Fixed Thumbnail */}
+                {/* Thumbnail */}
                 <td style={{ textAlign: 'center' }}>
-                  <div className="list-thumb-cell">
-                    <img src={photo} alt={item.casting_name} />
+                  <div style={{ width: '40px', height: '28px', borderRadius: '4px', overflow: 'hidden', margin: '0 auto', background: '#000' }}>
+                    <img src={photo} alt={item.casting_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 </td>
 
-                {/* Model & Casting Name */}
+                {/* Model Title */}
                 <td>
-                  <div className="list-cell-title" title={item.casting_name}>
+                  <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
                     {item.casting_name}
                   </div>
-                  {item.era && (
-                    <div className="list-cell-sub">
-                      {item.era}
-                    </div>
-                  )}
                 </td>
 
                 {/* Brand */}
@@ -108,7 +104,7 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
 
                     <td style={{ textAlign: 'right' }}>
                       <div style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#34d399', fontSize: '0.875rem' }}>
-                        {formatCurrency(item.current_value, currency)}
+                        {formatCurrency(effectiveValue, currency)}
                       </div>
                       <div style={{ fontSize: '0.68rem', color: isPositive ? '#34d399' : '#f87171' }}>
                         {isPositive ? '+' : ''}{formatCurrency(profit, currency)}

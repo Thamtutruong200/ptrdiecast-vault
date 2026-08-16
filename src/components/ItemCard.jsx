@@ -157,8 +157,10 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
               </div>
 
               <div className="price-unit" style={{ textAlign: 'right' }}>
-                <span className="price-title">Est. Value</span>
-                <span className="price-amount highlight">{formatCurrency(item.current_value, currency)}</span>
+                <span className="price-title">Value</span>
+                <span className="price-amount highlight">
+                  {formatCurrency((item.current_value && item.current_value > 0) ? item.current_value : item.purchase_price, currency)}
+                </span>
               </div>
             </>
           ) : (

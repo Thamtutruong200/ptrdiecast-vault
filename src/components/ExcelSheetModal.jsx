@@ -257,7 +257,7 @@ export default function ExcelSheetModal({ items, onClose, onRefresh, activeCateg
                 <th style={{ minWidth: '150px' }}>Era / Series</th>
                 <th style={{ minWidth: '150px' }}>Condition</th>
                 <th style={{ minWidth: '140px', textAlign: 'right' }}>Paid Cost (VND)</th>
-                <th style={{ minWidth: '140px', textAlign: 'right' }}>Est. Value (VND)</th>
+                <th style={{ minWidth: '140px', textAlign: 'right' }}>Value (VND)</th>
                 <th style={{ minWidth: '220px' }}>Valuation Provenance</th>
                 <th style={{ minWidth: '260px' }}>Collector Notes</th>
                 <th style={{ width: '80px', textAlign: 'center' }}>Actions</th>

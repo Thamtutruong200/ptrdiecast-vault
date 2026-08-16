@@ -62,12 +62,13 @@ export default function Navbar({
         <div className="brand-logo">
           <img 
             src={ptrLogo} 
-            alt="PTR Motorsport" 
+            alt="PTr's Collectibles" 
             className="brand-logo-img"
           />
           <div className="brand-title">
-            <span>PTR Motorsport</span>
-            <span className="brand-sub">PTr's Collectibles</span>
+            <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+              PTr's Collectibles
+            </span>
           </div>
         </div>
 

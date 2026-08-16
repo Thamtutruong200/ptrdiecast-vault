@@ -139,30 +139,15 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
               {item.era}
             </span>
           )}
-          {showPrices && (
-            <span className="apple-tag" style={{ color: 'var(--apple-green)', borderColor: 'rgba(52, 211, 153, 0.25)' }} title={`Valuation Source: ${item.valuation_source || 'Market Comps'}`}>
-              <TrendingUp size={10} />
-              {getValuationSourceShort(item.valuation_source)}
-            </span>
-          )}
         </div>
 
         {/* Financial Footer (or Showcase Footer in Spectator Mode) */}
         <div className="card-footer">
           {showPrices ? (
-            <>
-              <div className="price-unit">
-                <span className="price-title">Paid</span>
-                <span className="price-amount">{formatCurrency(item.purchase_price, currency)}</span>
-              </div>
-
-              <div className="price-unit" style={{ textAlign: 'right' }}>
-                <span className="price-title">Value</span>
-                <span className="price-amount highlight">
-                  {formatCurrency((item.current_value && item.current_value > 0) ? item.current_value : item.purchase_price, currency)}
-                </span>
-              </div>
-            </>
+            <div className="price-unit" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span className="price-title">Price</span>
+              <span className="price-amount highlight">{formatCurrency(item.purchase_price, currency)}</span>
+            </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
               <span style={{ fontWeight: 600, color: 'var(--apple-blue)' }}>Showcase Spec</span>

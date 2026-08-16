@@ -116,19 +116,16 @@ export default function ExcelSheetModal({ items, onClose, onRefresh, activeCateg
   // Export CSV from Sheet
   const handleExportCSV = () => {
     sound.playTap();
-    const headers = ['Category', 'Brand', 'Scale', 'Casting Name', 'Livery', 'Color', 'Era', 'Condition', 'Purchase Price', 'Current Value', 'Valuation Source', 'Notes'];
+    const headers = ['Category', 'Brand', 'Scale', 'Casting Name', 'Livery', 'Era', 'Condition', 'Purchase Price', 'Notes'];
     const rows = sheetData.map(r => [
-      `"${r.category || 'diecast'}"`,
-      `"${(r.brand || '').replace(/"/g, '""')}"`,
-      `"${(r.scale || '').replace(/"/g, '""')}"`,
+      r.category || 'diecast',
+      r.brand || '',
+      r.scale || '',
       `"${(r.casting_name || '').replace(/"/g, '""')}"`,
       `"${(r.livery || '').replace(/"/g, '""')}"`,
-      `"${(r.color || '').replace(/"/g, '""')}"`,
       `"${(r.era || '').replace(/"/g, '""')}"`,
-      `"${(r.condition || '').replace(/"/g, '""')}"`,
+      r.condition || '',
       r.purchase_price || 0,
-      r.current_value || 0,
-      `"${(r.valuation_source || '').replace(/"/g, '""')}"`,
       `"${(r.notes || '').replace(/"/g, '""')}"`
     ]);
 
@@ -253,12 +250,9 @@ export default function ExcelSheetModal({ items, onClose, onRefresh, activeCateg
                 <th style={{ minWidth: '90px' }}>Scale / Type</th>
                 <th style={{ minWidth: '220px' }}>Model / Casting Name</th>
                 <th style={{ minWidth: '180px' }}>Livery / Edition</th>
-                <th style={{ minWidth: '140px' }}>Color</th>
                 <th style={{ minWidth: '150px' }}>Era / Series</th>
                 <th style={{ minWidth: '150px' }}>Condition</th>
-                <th style={{ minWidth: '140px', textAlign: 'right' }}>Paid Cost (VND)</th>
-                <th style={{ minWidth: '140px', textAlign: 'right' }}>Value (VND)</th>
-                <th style={{ minWidth: '220px' }}>Valuation Provenance</th>
+                <th style={{ minWidth: '140px', textAlign: 'right' }}>Price (VND)</th>
                 <th style={{ minWidth: '260px' }}>Collector Notes</th>
                 <th style={{ width: '80px', textAlign: 'center' }}>Actions</th>
               </tr>
@@ -323,16 +317,6 @@ export default function ExcelSheetModal({ items, onClose, onRefresh, activeCateg
                     />
                   </td>
 
-                  {/* Color */}
-                  <td>
-                    <input 
-                      type="text"
-                      className="excel-cell-input"
-                      value={row.color || ''}
-                      onChange={(e) => handleCellChange(index, 'color', e.target.value)}
-                    />
-                  </td>
-
                   {/* Era */}
                   <td>
                     <input 
@@ -363,31 +347,10 @@ export default function ExcelSheetModal({ items, onClose, onRefresh, activeCateg
                   <td>
                     <input 
                       type="number"
-                      className="excel-cell-input font-mono"
-                      style={{ textAlign: 'right' }}
-                      value={row.purchase_price || 0}
-                      onChange={(e) => handleCellChange(index, 'purchase_price', e.target.value)}
-                    />
-                  </td>
-
-                  {/* Current Value */}
-                  <td>
-                    <input 
-                      type="number"
                       className="excel-cell-input font-mono font-bold"
                       style={{ textAlign: 'right', color: '#34d399' }}
-                      value={row.current_value || 0}
-                      onChange={(e) => handleCellChange(index, 'current_value', e.target.value)}
-                    />
-                  </td>
-
-                  {/* Valuation Source */}
-                  <td>
-                    <input 
-                      type="text"
-                      className="excel-cell-input"
-                      value={row.valuation_source || ''}
-                      onChange={(e) => handleCellChange(index, 'valuation_source', e.target.value)}
+                      value={row.purchase_price || 0}
+                      onChange={(e) => handleCellChange(index, 'purchase_price', e.target.value)}
                     />
                   </td>
 

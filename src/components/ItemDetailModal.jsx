@@ -187,7 +187,7 @@ export default function ItemDetailModal({
 
             {/* Right: Specifications & Intelligence */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
-              {/* Valuation Intelligence Card (Shown only if permitted) */}
+              {/* Purchase Price Card */}
               {showPrices && (
                 <div 
                   style={{ 
@@ -197,58 +197,19 @@ export default function ItemDetailModal({
                     padding: '1.15rem',
                     boxShadow: 'var(--shadow-subtle), var(--glass-specular)',
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.75rem'
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div className="price-title">Paid Cost</div>
-                      <div className="price-amount" style={{ fontSize: '1.25rem', marginTop: '0.2rem' }}>
-                        {formatCurrency(item.purchase_price, currency)}
-                      </div>
-                    </div>
-
-                    <div style={{ textAlign: 'right' }}>
-                      <div className="price-title">Collection Value</div>
-                      <div className="price-amount highlight" style={{ fontSize: '1.35rem', marginTop: '0.2rem' }}>
-                        {formatCurrency((item.current_value && item.current_value > 0) ? item.current_value : item.purchase_price, currency)}
-                      </div>
+                  <div>
+                    <div className="price-title">Purchase Price</div>
+                    <div className="price-amount highlight" style={{ fontSize: '1.35rem', marginTop: '0.2rem' }}>
+                      {formatCurrency(item.purchase_price, currency)}
                     </div>
                   </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.45rem', borderTop: '1px solid var(--glass-border)', fontSize: '0.8125rem' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Net Capital Gain:</span>
-                    <span className={`gain-badge ${isPositive ? 'positive' : 'negative'}`}>
-                      {isPositive ? '+' : ''}{profitPct}% ({isPositive ? '+' : ''}{formatCurrency(profit, currency)})
-                    </span>
-                  </div>
-
-                  <div 
-                    onClick={() => {
-                      sound.playTap();
-                      onOpenValuationInfo();
-                    }}
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'space-between',
-                      background: 'rgba(52, 211, 153, 0.12)',
-                      border: '1px solid rgba(52, 211, 153, 0.3)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '0.45rem 0.75rem',
-                      cursor: 'pointer',
-                      fontSize: '0.75rem',
-                      color: '#34d399'
-                    }}
-                    title="Click to learn how valuation comps are calculated"
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <ShieldCheck size={14} />
-                      <strong>Valuation Source:</strong> {item.valuation_source || 'Market Comps (eBay / Auctions)'}
-                    </span>
-                    <HelpCircle size={14} />
-                  </div>
+                  <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 700, background: 'rgba(52, 211, 153, 0.12)', padding: '0.3rem 0.65rem', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
+                    Authenticated Spec
+                  </span>
                 </div>
               )}
 

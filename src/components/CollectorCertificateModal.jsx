@@ -159,34 +159,24 @@ export default function CollectorCertificateModal({ item, onClose, currency = 'V
             </div>
 
             {/* Specifications Matrix Table */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '10px', padding: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.85rem', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '10px', padding: '1.15rem', marginBottom: '1.5rem' }}>
               <div>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Livery / Theme</div>
-                <div style={{ fontSize: '0.8rem', color: '#f5f5f7', fontWeight: 700, marginTop: '0.15rem' }}>{item.livery || 'Factory Original'}</div>
+                <div style={{ fontSize: '0.85rem', color: '#f5f5f7', fontWeight: 700, marginTop: '0.15rem' }}>{item.livery || 'Factory Original'}</div>
               </div>
               <div>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Condition Rating</div>
-                <div style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 700, marginTop: '0.15rem' }}>{item.condition || 'Mint in Box'}</div>
+                <div style={{ fontSize: '0.85rem', color: '#34d399', fontWeight: 700, marginTop: '0.15rem' }}>{item.condition || 'Mint in Box'}</div>
               </div>
               <div>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Era / Series</div>
-                <div style={{ fontSize: '0.8rem', color: '#f5f5f7', fontWeight: 700, marginTop: '0.15rem' }}>{item.era || 'Modern Supercar'}</div>
+                <div style={{ fontSize: '0.85rem', color: '#f5f5f7', fontWeight: 700, marginTop: '0.15rem' }}>{item.era || 'Modern Supercar'}</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Purchase Index</div>
-                <div style={{ fontSize: '0.85rem', color: '#f5f5f7', fontWeight: 800, marginTop: '0.15rem', fontFamily: 'monospace' }}>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Purchase Price</div>
+                <div style={{ fontSize: '0.95rem', color: '#d4af37', fontWeight: 800, marginTop: '0.15rem', fontFamily: 'monospace' }}>
                   {formatCurrency(item.purchase_price, currency)}
                 </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Market Appraisal</div>
-                <div style={{ fontSize: '0.85rem', color: '#34d399', fontWeight: 800, marginTop: '0.15rem', fontFamily: 'monospace' }}>
-                  {formatCurrency(item.current_value, currency)}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Valuation Methodology</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 600, marginTop: '0.15rem' }}>{item.valuation_source || 'Verified Comps'}</div>
               </div>
             </div>
 

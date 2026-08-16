@@ -242,9 +242,9 @@ export default function MuseumShowroomModal({ items = [], onClose, currency = 'V
               <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 700, marginTop: '0.2rem' }}>{currentItem.era || 'Modern Supercar'}</div>
             </div>
             <div>
-              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 700 }}>Market Value</div>
-              <div style={{ fontSize: '1.25rem', color: '#34d399', fontWeight: 900, marginTop: '0.2rem', fontFamily: 'monospace' }}>
-                {formatCurrency(currentItem.current_value, currency)}
+              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 700 }}>Purchase Price</div>
+              <div style={{ fontSize: '1.25rem', color: '#d4af37', fontWeight: 900, marginTop: '0.2rem', fontFamily: 'monospace' }}>
+                {formatCurrency(currentItem.purchase_price, currency)}
               </div>
             </div>
           </div>

@@ -531,18 +531,6 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                 />
               </div>
 
-              {/* Color */}
-              <div className="form-group">
-                <label className="form-label">Body Color</label>
-                <input 
-                  type="text"
-                  className="form-control"
-                  placeholder="e.g. Ice Grey Metallic, Lava Orange"
-                  value={formData.color}
-                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                />
-              </div>
-
               {/* Era / Series */}
               <div className="form-group">
                 <label className="form-label">Era / Motorsport Category</label>
@@ -556,7 +544,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
               </div>
 
               {/* Condition */}
-              <div className="form-group">
+              <div className="form-group col-span-2">
                 <label className="form-label">Condition Rating *</label>
                 <select 
                   className="form-control"
@@ -571,16 +559,16 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
             </div>
           </div>
 
-          {/* SECTION 3: VALUATION & FINANCIALS */}
+          {/* SECTION 3: PURCHASE PRICE */}
           <div className="form-section-card">
             <div className="form-section-title" style={{ marginBottom: '1rem' }}>
               <DollarSign size={15} color="var(--apple-green)" />
-              <span>Valuation & Financial Telemetry</span>
+              <span>Purchase Price</span>
             </div>
 
             <div className="form-grid">
               {/* Purchase Price */}
-              <div className="form-group">
+              <div className="form-group col-span-2">
                 <label className="form-label">Purchase Price (VND ₫)</label>
                 <input 
                   type="number"
@@ -591,50 +579,8 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                   onChange={(e) => setFormData({ ...formData, purchase_price: Number(e.target.value) })}
                 />
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.2rem', fontWeight: 600 }}>
-                  Paid: {formatVND(formData.purchase_price)}
+                  Price: {formatVND(formData.purchase_price)}
                 </div>
-              </div>
-
-              {/* Market Valuation */}
-              <div className="form-group">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                  <label className="form-label" style={{ margin: 0 }}>Collection Value (VND ₫)</label>
-                  {onOpenValuationInfo && (
-                    <button
-                      type="button"
-                      onClick={onOpenValuationInfo}
-                      style={{ background: 'none', border: 'none', color: '#34d399', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.7rem' }}
-                    >
-                      <HelpCircle size={11} />
-                      <span>How it works</span>
-                    </button>
-                  )}
-                </div>
-                <input 
-                  type="number"
-                  step="10000"
-                  className="form-control font-mono"
-                  value={formData.current_value || ''}
-                  placeholder="Leave blank to match Paid Price"
-                  onChange={(e) => setFormData({ ...formData, current_value: Number(e.target.value) })}
-                />
-                <div style={{ fontSize: '0.75rem', color: '#34d399', marginTop: '0.2rem', fontWeight: 700 }}>
-                  Collection Value: {formatVND(formData.current_value || formData.purchase_price || 0)}
-                </div>
-              </div>
-
-              {/* Valuation Source */}
-              <div className="form-group col-span-2">
-                <label className="form-label">Valuation Provenance / Methodology</label>
-                <select 
-                  className="form-control"
-                  value={formData.valuation_source}
-                  onChange={(e) => setFormData({ ...formData, valuation_source: e.target.value })}
-                >
-                  {VALUATION_SOURCES.map(s => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
               </div>
             </div>
           </div>

@@ -162,22 +162,17 @@ export default function ShowcaseStage({ items, onSelectCar, onToggleFavorite, sh
               </div>
             )}
 
-            {/* Price & Valuation HUD (if permitted) */}
+            {/* Price HUD (if permitted) */}
             {showPrices ? (
               <div className="stage-hud-price-row">
                 <div>
-                  <div className="price-title">Paid Cost</div>
-                  <div className="price-amount" style={{ fontSize: '1.15rem' }}>{formatVND(currentCar.purchase_price)}</div>
+                  <div className="price-title">Purchase Price</div>
+                  <div className="price-amount highlight" style={{ fontSize: '1.25rem' }}>{formatVND(currentCar.purchase_price)}</div>
                 </div>
-
                 <div style={{ textAlign: 'right' }}>
-                  <div className="price-title">Collection Value</div>
-                  <div className="price-amount highlight" style={{ fontSize: '1.25rem' }}>
-                    {formatVND((currentCar.current_value && currentCar.current_value > 0) ? currentCar.current_value : currentCar.purchase_price)}
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600 }}>
-                    {isPositive ? '+' : ''}{profitPct}% ({isPositive ? '+' : ''}{formatVND(profit)})
-                  </div>
+                  <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700, background: 'rgba(52, 211, 153, 0.12)', padding: '0.25rem 0.55rem', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
+                    {currentCar.condition}
+                  </span>
                 </div>
               </div>
             ) : (

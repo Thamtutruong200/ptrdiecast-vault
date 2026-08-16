@@ -20,10 +20,7 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
             <th style={{ minWidth: '160px' }}>Livery / Edition</th>
             <th style={{ width: '130px' }}>Condition</th>
             {showPrices && (
-              <>
-                <th style={{ width: '130px', textAlign: 'right' }}>Cost Paid</th>
-                <th style={{ width: '130px', textAlign: 'right' }}>Value</th>
-              </>
+              <th style={{ width: '130px', textAlign: 'right' }}>Price</th>
             )}
             <th style={{ width: isAdmin ? '100px' : '60px', textAlign: 'center' }}>Actions</th>
           </tr>
@@ -33,10 +30,6 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
             const photo = (item.photos && item.photos.length > 0)
               ? item.photos[0]
               : 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=120&q=80';
-
-            const effectiveValue = (item.current_value && item.current_value > 0) ? item.current_value : (item.purchase_price || 0);
-            const profit = effectiveValue - (item.purchase_price || 0);
-            const isPositive = profit >= 0;
 
             return (
               <tr key={item.id || idx} onClick={() => onSelect(item)} className="list-view-row">
@@ -55,7 +48,7 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
                   </button>
                 </td>
 
-                {/* Thumbnail */}
+                {/* Photo Thumbnail */}
                 <td style={{ textAlign: 'center' }}>
                   <div style={{ width: '40px', height: '28px', borderRadius: '4px', overflow: 'hidden', margin: '0 auto', background: '#000' }}>
                     <img src={photo} alt={item.casting_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -81,10 +74,10 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
                   </span>
                 </td>
 
-                {/* Livery / Color */}
+                {/* Livery / Edition */}
                 <td>
                   <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                    {item.livery || item.color || '—'}
+                    {item.livery || '—'}
                   </div>
                 </td>
 
@@ -95,22 +88,11 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
                   </span>
                 </td>
 
-                {/* Optional Prices */}
+                {/* Price */}
                 {showPrices && (
-                  <>
-                    <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                      {formatCurrency(item.purchase_price, currency)}
-                    </td>
-
-                    <td style={{ textAlign: 'right' }}>
-                      <div style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700, color: '#34d399', fontSize: '0.875rem' }}>
-                        {formatCurrency(effectiveValue, currency)}
-                      </div>
-                      <div style={{ fontSize: '0.68rem', color: isPositive ? '#34d399' : '#f87171' }}>
-                        {isPositive ? '+' : ''}{formatCurrency(profit, currency)}
-                      </div>
-                    </td>
-                  </>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 700, fontSize: '0.875rem', color: '#34d399' }}>
+                    {formatCurrency(item.purchase_price, currency)}
+                  </td>
                 )}
 
                 {/* Quick Actions */}

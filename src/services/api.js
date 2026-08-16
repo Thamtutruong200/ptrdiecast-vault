@@ -343,10 +343,23 @@ async function compressImage(file, maxDimension = 1920, quality = 0.85) {
   });
 }
 
+// UUID v4 Generator for PostgreSQL Compliance
+export function generateUUID() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    try {
+      return crypto.randomUUID();
+    } catch (e) {}
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 // Local Storage Persistent Store & Deletion Blacklist Helpers
 const STORAGE_KEY = 'ptr_vault_items_v2';
 const DELETED_IDS_KEY = 'ptr_deleted_ids';
-const EDITED_ITEMS_KEY = 'ptr_edited_items';
 
 function getDeletedIds() {
   try {
@@ -423,12 +436,19 @@ export const api = {
       try {
         const { data, error } = await supabase.from('diecasts').select('*');
         if (!error && Array.isArray(data) && data.length > 0) {
-          // Filter out any locally deleted IDs that cloud hasn't purged yet
+          // Filter out any locally deleted IDs
           items = data.filter(x => !deletedIds.includes(x.id));
           isFromCloud = true;
+          
+          // Merge any locally created items that haven't synced to cloud yet
+          const local = loadLocalItems();
+          const cloudIds = new Set(items.map(x => x.id));
+          const localOnly = local.filter(x => !cloudIds.has(x.id) && !deletedIds.includes(x.id));
+          items = [...localOnly, ...items];
+          
           saveLocalItems(items);
         } else if (error) {
-          console.warn('Supabase getItems query notice:', error.message);
+          console.warn('Supabase getItems notice:', error.message);
         }
       } catch (e) {
         console.warn('Supabase fetch exception:', e);
@@ -532,62 +552,108 @@ export const api = {
     };
   },
 
-  // Create Item
+  // Create Item (Guaranteed UUID & Multi-Table Fallback)
   async createItem(itemData) {
+    const validUUID = (itemData.id && itemData.id.includes('-') && itemData.id.length >= 32)
+      ? itemData.id
+      : generateUUID();
+
     const payload = {
-      id: itemData.id || ('ptr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7)),
+      id: validUUID,
       category: itemData.category || 'diecast',
-      track_photos: itemData.track_photos || [],
-      ...itemData,
+      brand: itemData.brand || 'Minichamps',
+      scale: itemData.scale || '1:64',
+      casting_name: itemData.casting_name || 'Untitled Model',
+      livery: itemData.livery || '',
+      color: itemData.color || '',
+      era: itemData.era || '',
+      condition: itemData.condition || 'Mint in Box',
+      purchase_price: Number(itemData.purchase_price) || 0,
+      current_value: Number(itemData.current_value) || 0,
+      valuation_source: itemData.valuation_source || 'Market Comps (eBay / Auctions)',
+      notes: itemData.notes || '',
+      photos: Array.isArray(itemData.photos) ? itemData.photos : [],
+      track_photos: Array.isArray(itemData.track_photos) ? itemData.track_photos : [],
+      reference_photos: Array.isArray(itemData.reference_photos) ? itemData.reference_photos : [],
+      is_favorite: Boolean(itemData.is_favorite),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
 
+    // 1. Immediately persist to Local Store
+    const local = loadLocalItems();
+    saveLocalItems([payload, ...local.filter(x => x.id !== payload.id)]);
+
+    // 2. Synchronize to Supabase
     const supabase = getSupabase();
     if (supabase) {
       try {
+        // Attempt 1: Full payload insert
         const { data, error } = await supabase.from('diecasts').insert([payload]).select();
         if (!error && data && data.length > 0) {
           const created = data[0];
-          const local = loadLocalItems();
           saveLocalItems([created, ...local.filter(x => x.id !== created.id)]);
           return created;
         }
+
+        // Attempt 2: If Postgres table is missing category or track_photos column, strip them and insert
+        if (error) {
+          console.warn('Full insert failed, retrying legacy schema insert:', error.message);
+          const legacyPayload = { ...payload };
+          delete legacyPayload.category;
+          delete legacyPayload.track_photos;
+          const { data: legData, error: legErr } = await supabase.from('diecasts').insert([legacyPayload]).select();
+          if (!legErr && legData && legData.length > 0) {
+            const merged = { ...legData[0], category: payload.category, track_photos: payload.track_photos };
+            saveLocalItems([merged, ...local.filter(x => x.id !== merged.id)]);
+            return merged;
+          }
+        }
       } catch (e) {
-        console.warn('Supabase createItem error:', e);
+        console.warn('Supabase createItem exception:', e);
       }
     }
 
-    const local = loadLocalItems();
-    saveLocalItems([payload, ...local.filter(x => x.id !== payload.id)]);
     return payload;
   },
 
   // Update Item
   async updateItem(id, itemData) {
-    const supabase = getSupabase();
     const payload = {
       ...itemData,
       updated_at: new Date().toISOString()
     };
 
+    // 1. Immediately update Local Store
+    const local = loadLocalItems();
+    const updatedList = local.map(x => x.id === id ? { ...x, ...payload } : x);
+    saveLocalItems(updatedList);
+
+    // 2. Synchronize to Supabase
+    const supabase = getSupabase();
     if (supabase) {
       try {
         const { data, error } = await supabase.from('diecasts').update(payload).eq('id', id).select();
         if (!error && data && data.length > 0) {
           const updated = data[0];
-          const local = loadLocalItems();
           saveLocalItems(local.map(x => x.id === id ? { ...x, ...updated } : x));
           return updated;
         }
+
+        if (error) {
+          const legacyPayload = { ...payload };
+          delete legacyPayload.category;
+          delete legacyPayload.track_photos;
+          const { data: legData } = await supabase.from('diecasts').update(legacyPayload).eq('id', id).select();
+          if (legData && legData.length > 0) {
+            return { ...legData[0], ...payload };
+          }
+        }
       } catch (e) {
-        console.warn('Supabase updateItem error:', e);
+        console.warn('Supabase updateItem exception:', e);
       }
     }
 
-    const local = loadLocalItems();
-    const updatedList = local.map(x => x.id === id ? { ...x, ...payload } : x);
-    saveLocalItems(updatedList);
     const found = updatedList.find(x => x.id === id);
     return found || { id, ...payload };
   },

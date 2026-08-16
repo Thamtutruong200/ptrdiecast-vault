@@ -55,7 +55,6 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
   });
 
   const [isUploading, setIsUploading] = useState(false);
-  const [isScanningAI, setIsScanningAI] = useState(false);
   const [duplicateMatches, setDuplicateMatches] = useState([]);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -132,41 +131,6 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
     }
   };
 
-  // Trigger AI Auto-Scanner
-  const handleAIScan = async () => {
-    if (formData.photos.length === 0) {
-      alert('Please upload or snap a photo of the item first to scan with Apple Intelligence.');
-      return;
-    }
-
-    setIsScanningAI(true);
-    try {
-      const firstPhoto = formData.photos[0];
-      const res = await api.identifyImage({
-        imageBase64: firstPhoto.startsWith('data:') ? firstPhoto : null,
-        imageUrl: !firstPhoto.startsWith('data:') ? firstPhoto : null,
-      });
-
-      setFormData(prev => ({
-        ...prev,
-        brand: res.brand || prev.brand,
-        scale: res.scale || prev.scale,
-        casting_name: res.casting_name || prev.casting_name,
-        livery: res.livery || prev.livery,
-        color: res.color || prev.color,
-        era: res.era || prev.era,
-        condition: res.suggested_condition || prev.condition,
-        current_value: res.estimated_market_value || prev.current_value,
-        valuation_source: res.valuation_source || 'AI Vision & Collector Comps Index',
-        notes: (prev.notes ? prev.notes + '\n' : '') + (res.notes || ''),
-      }));
-    } catch (err) {
-      alert('AI Vision Scanner notice: ' + err.message);
-    } finally {
-      setIsScanningAI(false);
-    }
-  };
-
   const removePhoto = (indexToRemove) => {
     setFormData(prev => ({
       ...prev,
@@ -230,18 +194,16 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                   title="Snap photo with camera"
                 >
                   <Camera size={13} />
-                  <span>Camera</span>
+                  <span>Snap Photo</span>
                 </button>
-
-                <button 
-                  type="button" 
-                  className="btn btn-primary btn-sm"
-                  onClick={handleAIScan}
-                  disabled={isScanningAI || formData.photos.length === 0}
-                  title="Auto-fill specs from photo using AI Vision"
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload from computer"
                 >
-                  {isScanningAI ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                  <span>{isScanningAI ? 'Scanning...' : 'Apple Intelligence'}</span>
+                  <UploadCloud size={13} />
+                  <span>Upload</span>
                 </button>
               </div>
             </div>

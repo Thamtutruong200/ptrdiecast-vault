@@ -165,6 +165,8 @@ body {
   align-items: center;
   justify-content: space-between;
   height: 64px;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
 }
 
 .brand-logo {
@@ -205,12 +207,15 @@ body {
 /* Category Tab Switcher Capsule */
 .category-switcher-capsule {
   display: flex;
+  align-items: center;
   background: rgba(0, 0, 0, 0.25);
   border: var(--glass-border);
   border-radius: var(--radius-pill);
   padding: 3px;
   gap: 2px;
   box-shadow: var(--glass-specular);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 [data-theme="light"] .category-switcher-capsule {
@@ -218,7 +223,7 @@ body {
 }
 
 .category-tab-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.45rem;
   padding: 0.35rem 0.9rem;
@@ -230,6 +235,12 @@ body {
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.category-tab-btn span {
+  white-space: nowrap;
 }
 
 .category-tab-btn.active {
@@ -240,7 +251,7 @@ body {
 
 /* Status pill */
 .status-pill {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.45rem;
   padding: 0.35rem 0.75rem;
@@ -250,6 +261,8 @@ body {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 [data-theme="light"] .status-pill {
@@ -291,6 +304,12 @@ body {
   border: none;
   letter-spacing: -0.01em;
   user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn span {
+  white-space: nowrap;
 }
 
 .btn:active {
@@ -332,6 +351,8 @@ body {
 .btn-sm {
   padding: 0.35rem 0.8rem;
   font-size: 0.78rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-icon {
@@ -339,10 +360,11 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .device-toggle-pill {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   padding: 0.35rem 0.75rem;
@@ -354,6 +376,12 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.device-toggle-pill span {
+  white-space: nowrap;
 }
 
 .device-toggle-pill:hover {

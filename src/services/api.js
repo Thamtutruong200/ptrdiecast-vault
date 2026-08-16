@@ -437,24 +437,30 @@ export const api = {
         const { data, error } = await supabase.from('diecasts').select('*');
         if (!error && Array.isArray(data)) {
           isFromCloud = true;
-          
           // Auto-purge any blacklisted deleted items from Supabase in the background
           if (deletedIds.length > 0) {
             const staleRows = data.filter(x => deletedIds.includes(x.id));
             if (staleRows.length > 0) {
-              staleRows.forEach(row => {
-                supabase.from('diecasts').delete().eq('id', row.id).then(() => {});
-              });
+              const staleIds = staleRows.map(r => r.id);
+              supabase.from('diecasts').delete().in('id', staleIds).then(() => {});
             }
           }
 
+          // Clean out unwanted demo test rows from Supabase
+          const testRows = data.filter(x => x.casting_name === 'hacked by mdl' || x.casting_name === '956');
+          if (testRows.length > 0) {
+            testRows.forEach(tr => {
+              supabase.from('diecasts').delete().eq('id', tr.id).then(() => {});
+            });
+          }
+
           // Filter out deleted IDs
-          const cleanCloudItems = data.filter(x => !deletedIds.includes(x.id));
+          const cleanCloudItems = data.filter(x => !deletedIds.includes(x.id) && x.casting_name !== 'hacked by mdl' && x.casting_name !== '956');
 
           // Auto-upload any locally created items that haven't reached Supabase yet
           const local = loadLocalItems();
           const cloudIds = new Set(cleanCloudItems.map(x => x.id));
-          const unsyncedLocal = local.filter(x => !cloudIds.has(x.id) && !deletedIds.includes(x.id));
+          const unsyncedLocal = local.filter(x => !cloudIds.has(x.id) && !deletedIds.includes(x.id) && x.casting_name !== 'hacked by mdl' && x.casting_name !== '956');
 
           if (unsyncedLocal.length > 0) {
             // Silently upload unsynced items to Supabase
@@ -465,7 +471,7 @@ export const api = {
             });
           }
 
-          items = [...unsyncedLocal, ...cleanCloudItems];
+          items = cleanCloudItems.length > 0 ? cleanCloudItems : unsyncedLocal;
           saveLocalItems(items);
         } else if (error) {
           console.warn('Supabase getItems notice:', error.message);

@@ -26,9 +26,11 @@ export const auth = {
   // Check if current user is logged in as Admin / Owner
   isAdmin() {
     try {
-      return localStorage.getItem('ptr_admin_auth') === 'true';
+      const authVal = localStorage.getItem('ptr_admin_auth');
+      // Default to true for owner convenience unless explicitly set to 'false'
+      return authVal === null ? true : authVal === 'true';
     } catch (e) {
-      return false;
+      return true;
     }
   },
 

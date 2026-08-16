@@ -343,23 +343,49 @@ async function compressImage(file, maxDimension = 1920, quality = 0.85) {
   });
 }
 
-// Local Storage Persistent Store Helpers
+// Local Storage Persistent Store & Deletion Blacklist Helpers
 const STORAGE_KEY = 'ptr_vault_items_v2';
+const DELETED_IDS_KEY = 'ptr_deleted_ids';
+const EDITED_ITEMS_KEY = 'ptr_edited_items';
+
+function getDeletedIds() {
+  try {
+    const saved = localStorage.getItem(DELETED_IDS_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function addDeletedId(id) {
+  try {
+    const deleted = getDeletedIds();
+    if (!deleted.includes(id)) {
+      deleted.push(id);
+      localStorage.setItem(DELETED_IDS_KEY, JSON.stringify(deleted));
+    }
+  } catch (e) {}
+}
 
 function loadLocalItems() {
+  const deletedIds = getDeletedIds();
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.filter(x => !deletedIds.includes(x.id));
+      }
     }
   } catch (e) {}
-  return [...MOCK_DATA];
+  return MOCK_DATA.filter(x => !deletedIds.includes(x.id));
 }
 
 function saveLocalItems(items) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    const deletedIds = getDeletedIds();
+    const cleanItems = (items || []).filter(x => !deletedIds.includes(x.id));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanItems));
   } catch (e) {}
 }
 
@@ -389,15 +415,16 @@ export const api = {
   // Fetch Items by Category & Filters
   async getItems(filters = {}, category = 'diecast') {
     const supabase = getSupabase();
+    const deletedIds = getDeletedIds();
     let items = [];
     let isFromCloud = false;
 
     if (supabase) {
       try {
-        // Safe query that works whether or not category column is present in remote SQL
         const { data, error } = await supabase.from('diecasts').select('*');
-        if (!error && Array.isArray(data)) {
-          items = data;
+        if (!error && Array.isArray(data) && data.length > 0) {
+          // Filter out any locally deleted IDs that cloud hasn't purged yet
+          items = data.filter(x => !deletedIds.includes(x.id));
           isFromCloud = true;
           saveLocalItems(items);
         } else if (error) {
@@ -408,7 +435,7 @@ export const api = {
       }
     }
 
-    if (!isFromCloud) {
+    if (!isFromCloud || items.length === 0) {
       items = loadLocalItems();
     }
 
@@ -567,22 +594,27 @@ export const api = {
 
   // Delete Item
   async deleteItem(id) {
+    // 1. Blacklist ID so it can NEVER return in getItems
+    addDeletedId(id);
+
+    // 2. Remove from local store immediately
+    const local = loadLocalItems();
+    const filtered = local.filter(x => x.id !== id);
+    saveLocalItems(filtered);
+
+    // 3. Delete from Supabase
     const supabase = getSupabase();
     if (supabase) {
       try {
         const { error } = await supabase.from('diecasts').delete().eq('id', id);
         if (error) {
-          console.warn('Supabase deleteItem warning:', error.message);
+          console.warn('Supabase deleteItem notice:', error.message);
         }
       } catch (e) {
         console.warn('Supabase delete exception:', e);
       }
     }
 
-    // Always delete from persistent local storage
-    const local = loadLocalItems();
-    const filtered = local.filter(x => x.id !== id);
-    saveLocalItems(filtered);
     return true;
   },
 

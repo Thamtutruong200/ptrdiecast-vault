@@ -193,7 +193,7 @@ export default function App() {
   // Handle Delete
   const handleDeleteItem = async (item) => {
     try {
-      sound.playTrash();
+      try { sound.playTrash(); } catch (e) {}
       // Instant Optimistic Removal
       setItems(prev => prev.filter(i => i.id !== item.id));
       if (selectedItem && selectedItem.id === item.id) {

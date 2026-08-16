@@ -308,10 +308,8 @@ export default function ItemDetailModal({
                     className="btn btn-secondary" 
                     style={{ color: 'var(--apple-red)' }}
                     onClick={() => {
-                      if (window.confirm(`Delete ${item.casting_name} from vault?`)) {
-                        onDelete(item);
-                        onClose();
-                      }
+                      onDelete(item);
+                      onClose();
                     }}
                   >
                     <Trash2 size={15} />

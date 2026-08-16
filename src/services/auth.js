@@ -8,7 +8,7 @@
 import { getSupabase } from './api';
 
 const SYSTEM_CONFIG_ID = '00000000-0000-0000-0000-000000000001';
-const DEFAULT_MASTER_PIN = '1234';
+const DEFAULT_MASTER_PIN = '131415';
 
 export const auth = {
   // Sync Cloud Master PIN & Settings from Supabase

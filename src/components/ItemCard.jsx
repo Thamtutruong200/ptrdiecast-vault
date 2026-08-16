@@ -1,6 +1,7 @@
 import React from 'react';
-import { Star, Tag, TrendingUp, Sparkles } from 'lucide-react';
+import { Star, Tag, TrendingUp } from 'lucide-react';
 import { formatVND } from '../services/api';
+import { BrandBadge } from '../services/brandLogos';
 
 export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices = true }) {
   const primaryPhoto = (item.photos && item.photos.length > 0) 
@@ -17,7 +18,7 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
   const getValuationSourceShort = (source) => {
     if (!source) return 'Market Comps';
     if (source.includes('eBay') || source.includes('Auctions')) return 'Auction Comps';
-    if (source.includes('HobbyDB')) return 'HobbyDB Index';
+    if (source.includes('HobbyDB') || source.includes('BrickEconomy')) return 'Index Comps';
     if (source.includes('AI')) return 'AI Estimate';
     if (source.includes('Appraisal')) return 'Appraised';
     return source.length > 16 ? source.slice(0, 16) + '...' : source;
@@ -57,7 +58,11 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
 
       {/* Card Content */}
       <div className="card-body">
-        <div className="card-brand-label">{item.brand}</div>
+        {/* Brand Badge with Logo */}
+        <div style={{ marginBottom: '0.45rem' }}>
+          <BrandBadge brandName={item.brand} size="sm" />
+        </div>
+
         <h3 className="card-title" title={item.casting_name}>
           {item.casting_name}
         </h3>
@@ -111,7 +116,7 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
               <span style={{ fontWeight: 600, color: 'var(--apple-blue)' }}>Showcase Spec</span>
-              <span>Tap to Inspect →</span>
+              <span>Inspect Details →</span>
             </div>
           )}
         </div>

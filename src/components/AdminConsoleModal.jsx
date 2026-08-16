@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  X, Shield, KeyRound, Eye, EyeOff, Lock, Unlock, Database, 
-  PieChart, Plus, CheckCircle2, AlertCircle, Sparkles 
+  X, Shield, KeyRound, Eye, Lock, Database, 
+  PieChart, Plus, CheckCircle2, AlertCircle, FileSpreadsheet, Sparkles 
 } from 'lucide-react';
 import { auth } from '../services/auth';
 import { sound } from '../services/soundEffects';
@@ -11,7 +11,8 @@ export default function AdminConsoleModal({
   onSwitchToSpectator, 
   onOpenAdd, 
   onOpenSync, 
-  onOpenAnalytics 
+  onOpenAnalytics,
+  onOpenExcelSheet
 }) {
   const [hidePrices, setHidePrices] = useState(auth.hidePricesInSpectator());
   const [currentPin, setCurrentPin] = useState('');
@@ -34,7 +35,7 @@ export default function AdminConsoleModal({
     const res = auth.changePin(currentPin, newPin);
     if (res.success) {
       sound.playStar();
-      setPinMessage('Admin Master PIN updated successfully!');
+      setPinMessage('Master Password / PIN updated successfully!');
       setCurrentPin('');
       setNewPin('');
     } else {
@@ -46,6 +47,9 @@ export default function AdminConsoleModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-lg" onClick={(e) => e.stopPropagation()}>
+        {/* iOS Drag Handle */}
+        <div className="sheet-handle-bar" />
+
         {/* Header */}
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -65,7 +69,7 @@ export default function AdminConsoleModal({
               <Shield size={18} />
             </div>
             <div>
-              <div style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Master Owner Panel
               </div>
               <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: 700 }}>
@@ -79,13 +83,33 @@ export default function AdminConsoleModal({
         </div>
 
         {/* Body */}
-        <div className="modal-body" style={{ gap: '1.5rem' }}>
+        <div className="modal-body" style={{ gap: '1.25rem' }}>
           {/* Quick Action Shortcuts Grid */}
           <div>
             <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
-              Vault Operations
+              Vault Management & Operations
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.85rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+              {/* Action 1: Excel Live Sheet */}
+              <button 
+                className="stat-card" 
+                onClick={() => {
+                  sound.playSheetOpen();
+                  onClose();
+                  onOpenExcelSheet();
+                }}
+                style={{ cursor: 'pointer', textAlign: 'left', padding: '1rem', border: '1px solid rgba(16, 185, 129, 0.35)', background: 'linear-gradient(145deg, rgba(16, 185, 129, 0.12), rgba(18, 22, 34, 0.7))' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#34d399' }}>
+                  <FileSpreadsheet size={16} />
+                  <strong>Excel Sheet</strong>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
+                  Live spreadsheet editor
+                </div>
+              </button>
+
+              {/* Action 2: Add Model */}
               <button 
                 className="stat-card" 
                 onClick={() => {
@@ -93,17 +117,18 @@ export default function AdminConsoleModal({
                   onClose();
                   onOpenAdd();
                 }}
-                style={{ cursor: 'pointer', textAlign: 'left', padding: '1.15rem' }}
+                style={{ cursor: 'pointer', textAlign: 'left', padding: '1rem' }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--apple-blue)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--apple-blue)' }}>
                   <Plus size={16} />
-                  <strong>Add New Model</strong>
+                  <strong>Add Model</strong>
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.35rem' }}>
-                  Camera snap & AI scan
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
+                  Camera snap & AI
                 </div>
               </button>
 
+              {/* Action 3: Database Sync */}
               <button 
                 className="stat-card" 
                 onClick={() => {
@@ -111,17 +136,18 @@ export default function AdminConsoleModal({
                   onClose();
                   onOpenSync();
                 }}
-                style={{ cursor: 'pointer', textAlign: 'left', padding: '1.15rem' }}
+                style={{ cursor: 'pointer', textAlign: 'left', padding: '1rem' }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--apple-amber)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--apple-amber)' }}>
                   <Database size={16} />
-                  <strong>Cloud Database Sync</strong>
+                  <strong>Cloud Sync</strong>
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.35rem' }}>
-                  Supabase & CSV backups
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
+                  Supabase & CSV
                 </div>
               </button>
 
+              {/* Action 4: Analytics */}
               <button 
                 className="stat-card" 
                 onClick={() => {
@@ -129,32 +155,32 @@ export default function AdminConsoleModal({
                   onClose();
                   onOpenAnalytics();
                 }}
-                style={{ cursor: 'pointer', textAlign: 'left', padding: '1.15rem' }}
+                style={{ cursor: 'pointer', textAlign: 'left', padding: '1rem' }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--apple-purple)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--apple-purple)' }}>
                   <PieChart size={16} />
-                  <strong>Financial Portfolio</strong>
+                  <strong>Portfolio</strong>
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.35rem' }}>
-                  Total cost & valuation ROI
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
+                  Valuation ROI
                 </div>
               </button>
             </div>
           </div>
 
           {/* Privacy & Spectator Mode Settings */}
-          <div style={{ background: 'rgba(255, 255, 255, 0.04)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.85rem' }}>
+          <div style={{ background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '1.15rem' }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.65rem' }}>
               Spectator Console Privacy Controls
             </h3>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--glass-border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)' }}>
               <div>
                 <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                   Hide Paid Costs & Valuations in Spectator Mode
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                  When enabled, visitors / spectators only see models as a museum showroom without sensitive purchase prices.
+                  When enabled, visitors only see your collection as a museum showroom without sensitive purchase prices.
                 </div>
               </div>
               <input 
@@ -165,7 +191,7 @@ export default function AdminConsoleModal({
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem' }}>
               <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                 Active Mode: <strong>Admin (Unlocked)</strong>
               </span>
@@ -184,10 +210,10 @@ export default function AdminConsoleModal({
             </div>
           </div>
 
-          {/* Change PIN Section */}
-          <div style={{ background: 'rgba(255, 255, 255, 0.04)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.85rem' }}>
-              Change Admin Master PIN
+          {/* Change Master PIN Section */}
+          <div style={{ background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '1.15rem' }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.65rem' }}>
+              Change Master Password / PIN
             </h3>
 
             {pinMessage && (
@@ -203,11 +229,11 @@ export default function AdminConsoleModal({
 
             <form onSubmit={handleChangePin} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.75rem', alignItems: 'flex-end' }}>
               <div>
-                <label className="form-label" style={{ fontSize: '0.75rem' }}>Current PIN</label>
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>Current Password</label>
                 <input 
                   type="password"
                   className="form-control font-mono"
-                  placeholder="••••"
+                  placeholder="••••••••"
                   value={currentPin}
                   onChange={(e) => setCurrentPin(e.target.value)}
                   required
@@ -215,11 +241,11 @@ export default function AdminConsoleModal({
               </div>
 
               <div>
-                <label className="form-label" style={{ fontSize: '0.75rem' }}>New PIN (min 4 digits)</label>
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>New Password (min 4 chars)</label>
                 <input 
                   type="password"
                   className="form-control font-mono"
-                  placeholder="••••"
+                  placeholder="••••••••"
                   value={newPin}
                   onChange={(e) => setNewPin(e.target.value)}
                   required
@@ -228,13 +254,13 @@ export default function AdminConsoleModal({
 
               <button type="submit" className="btn btn-secondary btn-sm" style={{ height: '42px' }}>
                 <KeyRound size={14} />
-                <span>Update PIN</span>
+                <span>Update</span>
               </button>
             </form>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button className="btn btn-primary" onClick={onClose}>
+            <button className="btn btn-primary btn-sm" onClick={onClose}>
               Done
             </button>
           </div>

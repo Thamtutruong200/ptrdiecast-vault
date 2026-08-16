@@ -1,7 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { X, Star, Edit3, Trash2, Tag, TrendingUp, HelpCircle, ShieldCheck, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { 
+  X, Star, Edit3, Trash2, Tag, TrendingUp, HelpCircle, 
+  ShieldCheck, ZoomIn, ZoomOut, Flag, Image as ImageIcon 
+} from 'lucide-react';
 import { formatVND } from '../services/api';
 import { sound } from '../services/soundEffects';
+import { BrandBadge } from '../services/brandLogos';
 
 export default function ItemDetailModal({ 
   item, 
@@ -15,16 +19,20 @@ export default function ItemDetailModal({
 }) {
   if (!item) return null;
 
-  const allPhotos = [
-    ...(item.photos || []),
-    ...(item.reference_photos || [])
-  ];
+  const modelPhotos = item.photos && item.photos.length > 0
+    ? item.photos
+    : ['https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=80'];
 
-  const defaultPhoto = allPhotos.length > 0 
-    ? allPhotos[0] 
-    : 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=80';
+  const trackPhotos = item.track_photos && item.track_photos.length > 0
+    ? item.track_photos
+    : [
+        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=80'
+      ];
 
-  const [activePhoto, setActivePhoto] = useState(defaultPhoto);
+  const [activeTab, setActiveTab] = useState('model'); // 'model' or 'track'
+  const currentPhotoList = activeTab === 'model' ? modelPhotos : trackPhotos;
+  const [activePhoto, setActivePhoto] = useState(modelPhotos[0]);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const imageContainerRef = useRef(null);
@@ -46,9 +54,19 @@ export default function ItemDetailModal({
     setIsZoomed(!isZoomed);
   };
 
+  const switchTab = (tab) => {
+    sound.playTap();
+    setActiveTab(tab);
+    setIsZoomed(false);
+    setActivePhoto(tab === 'model' ? modelPhotos[0] : trackPhotos[0]);
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-lg" onClick={(e) => e.stopPropagation()}>
+        {/* iOS Style Sheet Handle Bar */}
+        <div className="sheet-handle-bar" />
+
         {/* Header */}
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -56,10 +74,10 @@ export default function ItemDetailModal({
               {item.scale || '1:64'}
             </span>
             <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--apple-blue)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                {item.brand}
+              <div style={{ marginBottom: '0.2rem' }}>
+                <BrandBadge brandName={item.brand} size="sm" />
               </div>
-              <h2 style={{ fontSize: '1.3rem', color: 'var(--text-primary)', fontWeight: 700 }}>
+              <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: 700 }}>
                 {item.casting_name}
               </h2>
             </div>
@@ -86,8 +104,30 @@ export default function ItemDetailModal({
         {/* Body */}
         <div className="modal-body">
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.25fr) minmax(0, 1fr)', gap: '1.85rem' }}>
-            {/* Left: Photos Lightbox with Macro Zoom */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {/* Left: Dual Photo Gallery (Model Photos vs Real-life On Track Racing) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {/* Photo Source Switcher: Model vs Track Heritage */}
+              <div className="photo-tab-switcher">
+                <button 
+                  type="button" 
+                  className={`photo-tab-btn ${activeTab === 'model' ? 'active' : ''}`}
+                  onClick={() => switchTab('model')}
+                >
+                  <ImageIcon size={13} style={{ display: 'inline', marginRight: 4 }} />
+                  <span>Vault Model ({modelPhotos.length})</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  className={`photo-tab-btn ${activeTab === 'track' ? 'active' : ''}`}
+                  onClick={() => switchTab('track')}
+                >
+                  <Flag size={13} style={{ display: 'inline', marginRight: 4, color: 'var(--apple-amber)' }} />
+                  <span>🏁 Real Race Track ({trackPhotos.length})</span>
+                </button>
+              </div>
+
+              {/* Main Photo Stage with 2.5x Loupe */}
               <div 
                 ref={imageContainerRef}
                 className="detail-photo-stage"
@@ -105,7 +145,7 @@ export default function ItemDetailModal({
                   style={{ 
                     width: '100%', 
                     height: '100%', 
-                    objectFit: 'contain',
+                    objectFit: activeTab === 'model' ? 'contain' : 'cover',
                     transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
                     transform: isZoomed ? 'scale(2.5)' : 'scale(1)',
                     transition: isZoomed ? 'none' : 'transform 0.3s ease'
@@ -115,14 +155,14 @@ export default function ItemDetailModal({
                 {/* Macro Zoom Hint Pill */}
                 <div className="macro-zoom-pill">
                   {isZoomed ? <ZoomOut size={12} /> : <ZoomIn size={12} />}
-                  <span>{isZoomed ? '2.5x Macro Loupe' : 'Tap to Zoom (2.5x)'}</span>
+                  <span>{isZoomed ? '2.5x Loupe' : 'Tap to Zoom (2.5x)'}</span>
                 </div>
               </div>
 
               {/* Thumbnails Carousel */}
-              {allPhotos.length > 1 && (
+              {currentPhotoList.length > 1 && (
                 <div style={{ display: 'flex', gap: '0.6rem', overflowX: 'auto', paddingBottom: '0.25rem' }}>
-                  {allPhotos.map((photo, idx) => (
+                  {currentPhotoList.map((photo, idx) => (
                     <button
                       key={idx}
                       onClick={() => {
@@ -150,19 +190,19 @@ export default function ItemDetailModal({
             </div>
 
             {/* Right: Specifications & Intelligence */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
               {/* Valuation Intelligence Card (Shown only if permitted) */}
               {showPrices && (
                 <div 
                   style={{ 
-                    background: 'rgba(255, 255, 255, 0.05)', 
+                    background: 'var(--bg-surface-elevated)', 
                     border: '1px solid rgba(52, 211, 153, 0.35)', 
                     borderRadius: 'var(--radius-lg)', 
-                    padding: '1.25rem',
-                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4), var(--glass-specular)',
+                    padding: '1.15rem',
+                    boxShadow: 'var(--shadow-subtle), var(--glass-specular)',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '0.85rem'
+                    gap: '0.75rem'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -181,7 +221,7 @@ export default function ItemDetailModal({
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--glass-border)', fontSize: '0.8125rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.45rem', borderTop: '1px solid var(--glass-border)', fontSize: '0.8125rem' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>Net Capital Gain:</span>
                     <span className={`gain-badge ${isPositive ? 'positive' : 'negative'}`}>
                       {isPositive ? '+' : ''}{profitPct}% ({isPositive ? '+' : ''}{formatVND(profit)})
@@ -216,24 +256,24 @@ export default function ItemDetailModal({
                 </div>
               )}
 
-              {/* iOS Inset Specs Table */}
-              <div style={{ background: 'rgba(255, 255, 255, 0.04)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '0.25rem 1.15rem', boxShadow: 'var(--glass-specular)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Racing Livery</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.livery || 'Factory Stock'}</span>
+              {/* Inset Specs Table */}
+              <div style={{ background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '0.25rem 1.15rem', boxShadow: 'var(--glass-specular)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>Livery / Edition</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.livery || 'Factory Original'}</span>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
                   <span style={{ color: 'var(--text-secondary)' }}>Body Color</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.color || 'N/A'}</span>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Era / Category</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>Era / Series</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.era || 'Motorsport'}</span>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', fontSize: '0.875rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', fontSize: '0.875rem' }}>
                   <span style={{ color: 'var(--text-secondary)' }}>Condition Rating</span>
                   <span style={{ fontWeight: 600, color: 'var(--apple-amber)' }}>{item.condition}</span>
                 </div>
@@ -241,11 +281,11 @@ export default function ItemDetailModal({
 
               {/* Collector Notes */}
               {item.notes && (
-                <div style={{ background: 'rgba(255, 255, 255, 0.04)', padding: '0.95rem 1.15rem', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', boxShadow: 'var(--glass-specular)' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    Collector Notes & Authenticity
+                <div style={{ background: 'var(--bg-surface-elevated)', padding: '0.85rem 1.15rem', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', boxShadow: 'var(--glass-specular)' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Collector Notes & Heritage
                   </div>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
                     {item.notes}
                   </p>
                 </div>
@@ -253,7 +293,7 @@ export default function ItemDetailModal({
 
               {/* Action Bar (Only visible to Admin) */}
               {isAdmin ? (
-                <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '1rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '0.75rem' }}>
                   <button 
                     className="btn btn-secondary" 
                     style={{ flex: 1 }}
@@ -282,8 +322,8 @@ export default function ItemDetailModal({
                   </button>
                 </div>
               ) : (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'auto', paddingTop: '1rem' }}>
-                  <button className="btn btn-secondary" onClick={onClose}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'auto', paddingTop: '0.75rem' }}>
+                  <button className="btn btn-secondary btn-sm" onClick={onClose}>
                     Close Spectator View
                   </button>
                 </div>

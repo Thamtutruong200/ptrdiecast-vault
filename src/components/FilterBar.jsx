@@ -1,41 +1,55 @@
 import React from 'react';
-import { Search, X, Star, LayoutGrid, Sparkles, List, ArrowUpDown } from 'lucide-react';
+import { Search, LayoutGrid, Sparkles, Table, Star } from 'lucide-react';
 import { sound } from '../services/soundEffects';
 
-const SCALES = ['All', '1:64', '1:43', '1:24', '1:18', '1:12', 'Other'];
+const DIECAST_SCALES = ['All', '1:64', '1:43', '1:24', '1:18', '1:12', 'Other'];
+const TOY_SCALES = ['All', '1:8', '1:60', '400%', '1000%', 'Statue', 'Figure', 'Other'];
 
-const BRANDS = [
-  'All',
-  'Minichamps',
-  'Hot Wheels RLC',
-  'Hot Wheels Premium',
-  'Mini GT',
-  'Inno64',
-  'Kaido House',
-  'Tarmac Works',
-  'Tomica Limited Vintage',
-  'AUTOart',
-  'Spark',
-  'Kyosho',
-  'Bburago',
-  'Matchbox Collectors',
-  'Other'
+const DIECAST_BRANDS = [
+  'All', 'Minichamps', 'Hot Wheels RLC', 'Hot Wheels Premium', 'AUTOart', 
+  'Spark', 'Mini GT', 'Inno64', 'Kaido House', 'Tarmac Works', 'Tomica Limited Vintage', 'Other'
 ];
 
-const CONDITIONS = ['All', 'Mint in Box', 'Loose Mint', 'Displayed', 'Custom', 'Fair'];
+const TOY_BRANDS = [
+  'All', 'Lego', 'Gundam / Bandai', 'Pop Mart', 'Medicom Bearbrick', 'Hot Toys', 'Good Smile Company', 'Hasbro', 'Other'
+];
 
-export default function FilterBar({ filters, setFilters, viewMode, setViewMode, searchInputRef }) {
+export default function FilterBar({ 
+  filters, 
+  setFilters, 
+  viewMode, 
+  setViewMode, 
+  searchInputRef,
+  activeCategory = 'diecast'
+}) {
+  const scales = activeCategory === 'diecast' ? DIECAST_SCALES : TOY_SCALES;
+  const brands = activeCategory === 'diecast' ? DIECAST_BRANDS : TOY_BRANDS;
+
+  const handleSearchChange = (e) => {
+    setFilters(prev => ({ ...prev, q: e.target.value }));
+  };
+
   const handleScaleSelect = (scale) => {
     sound.playTap();
     setFilters(prev => ({ ...prev, scale }));
   };
 
-  const handleClearSearch = () => {
+  const handleBrandChange = (e) => {
     sound.playTap();
-    setFilters(prev => ({ ...prev, q: '' }));
+    setFilters(prev => ({ ...prev, brand: e.target.value }));
   };
 
-  const toggleFavoriteFilter = () => {
+  const handleConditionChange = (e) => {
+    sound.playTap();
+    setFilters(prev => ({ ...prev, condition: e.target.value }));
+  };
+
+  const handleSortChange = (e) => {
+    sound.playTap();
+    setFilters(prev => ({ ...prev, sort_by: e.target.value }));
+  };
+
+  const handleFavoriteToggle = () => {
     sound.playStar();
     setFilters(prev => ({
       ...prev,
@@ -45,152 +59,130 @@ export default function FilterBar({ filters, setFilters, viewMode, setViewMode, 
 
   return (
     <div className="filter-bar">
-      {/* Top Search, View Mode Switcher, and Filters */}
-      <div className="filter-top-row">
-        {/* Apple Inset Search Box with ⌘K Badge */}
-        <div className="search-box">
-          <Search size={16} />
-          <input
+      {/* Top Search and View Switcher Row */}
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1rem' }}>
+        <div className="search-input-wrapper">
+          <Search size={16} className="search-icon" />
+          <input 
             ref={searchInputRef}
             type="text"
             className="search-input"
-            placeholder="Search casting, brand, livery, color... (⌘K / /)"
+            placeholder={activeCategory === 'diecast' ? "Search casting, brand, livery, color... (⌘K or /)" : "Search collectible, series, brand, edition... (⌘K or /)"}
             value={filters.q || ''}
-            onChange={(e) => setFilters(prev => ({ ...prev, q: e.target.value }))}
+            onChange={handleSearchChange}
           />
-          {filters.q && (
-            <button className="clear-search-btn" onClick={handleClearSearch}>
-              <X size={12} />
-            </button>
-          )}
         </div>
 
-        {/* Apple View Mode Switcher (Gallery, Showcase Studio, Table List) */}
-        <div className="segmented-control" style={{ padding: '3px' }}>
-          <button
+        {/* View Mode Segmented Switcher */}
+        <div className="category-switcher-capsule" style={{ padding: '2px' }}>
+          <button 
             type="button"
-            className={`segment-btn ${viewMode === 'grid' ? 'active' : ''}`}
+            className={`category-tab-btn ${viewMode === 'grid' ? 'active' : ''}`}
             onClick={() => {
               sound.playTap();
               setViewMode('grid');
             }}
-            title="Gallery Grid View (4 Cars / Row)"
+            title="Gallery Grid View (1)"
           >
-            <LayoutGrid size={13} style={{ marginRight: '0.3rem', verticalAlign: '-1px' }} />
-            <span>Gallery</span>
+            <LayoutGrid size={13} />
+            <span style={{ fontSize: '0.75rem' }}>Gallery</span>
           </button>
 
-          <button
+          <button 
             type="button"
-            className={`segment-btn ${viewMode === 'showcase' ? 'active' : ''}`}
+            className={`category-tab-btn ${viewMode === 'showcase' ? 'active' : ''}`}
             onClick={() => {
               sound.playTap();
               setViewMode('showcase');
             }}
-            title="3D Cinematic Showcase Stage"
+            title="3D Cinematic Showcase Studio (2)"
           >
-            <Sparkles size={13} style={{ marginRight: '0.3rem', verticalAlign: '-1px' }} color="var(--apple-blue)" />
-            <span>Showcase Studio</span>
+            <Sparkles size={13} />
+            <span style={{ fontSize: '0.75rem' }}>Showcase</span>
           </button>
 
-          <button
+          <button 
             type="button"
-            className={`segment-btn ${viewMode === 'list' ? 'active' : ''}`}
+            className={`category-tab-btn ${viewMode === 'list' ? 'active' : ''}`}
             onClick={() => {
               sound.playTap();
               setViewMode('list');
             }}
-            title="Compact Table List View"
+            title="Compact Table List View (3)"
           >
-            <List size={13} style={{ marginRight: '0.3rem', verticalAlign: '-1px' }} />
-            <span>Table List</span>
-          </button>
-        </div>
-
-        {/* Filter Dropdowns */}
-        <div className="filter-selectors">
-          {/* Brand Picker */}
-          <select 
-            className="select-control"
-            value={filters.brand || 'All'}
-            onChange={(e) => {
-              sound.playTap();
-              setFilters(prev => ({ ...prev, brand: e.target.value }));
-            }}
-          >
-            {BRANDS.map(b => (
-              <option key={b} value={b}>Brand: {b}</option>
-            ))}
-          </select>
-
-          {/* Condition Picker */}
-          <select 
-            className="select-control"
-            value={filters.condition || 'All'}
-            onChange={(e) => {
-              sound.playTap();
-              setFilters(prev => ({ ...prev, condition: e.target.value }));
-            }}
-          >
-            {CONDITIONS.map(c => (
-              <option key={c} value={c}>Condition: {c}</option>
-            ))}
-          </select>
-
-          {/* Sort Picker */}
-          <select 
-            className="select-control"
-            value={`${filters.sort_by || 'created_at'}-${filters.sort_order || 'desc'}`}
-            onChange={(e) => {
-              sound.playTap();
-              const [sort_by, sort_order] = e.target.value.split('-');
-              setFilters(prev => ({ ...prev, sort_by, sort_order }));
-            }}
-          >
-            <option value="created_at-desc">Sort: Newest</option>
-            <option value="created_at-asc">Sort: Oldest</option>
-            <option value="current_value-desc">Sort: Highest Valuation</option>
-            <option value="current_value-asc">Sort: Lowest Valuation</option>
-            <option value="purchase_price-desc">Sort: Purchase Cost</option>
-            <option value="casting_name-asc">Sort: Name (A-Z)</option>
-          </select>
-
-          {/* Starred Filter Button */}
-          <button 
-            type="button"
-            className={`btn btn-sm ${filters.is_favorite ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={toggleFavoriteFilter}
-            title="Filter Starred Favorites"
-          >
-            <Star 
-              size={13} 
-              fill={filters.is_favorite ? '#fff' : 'none'} 
-              color={filters.is_favorite ? '#fff' : 'var(--apple-amber)'} 
-            />
-            <span>Starred</span>
+            <Table size={13} />
+            <span style={{ fontSize: '0.75rem' }}>Table</span>
           </button>
         </div>
       </div>
 
-      {/* Scale Selector Segmented Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.2rem' }}>
-        <span style={{ fontSize: '0.8125rem', color: 'var(--text-tertiary)', fontWeight: 600 }}>
-          Scale:
+      {/* Dropdowns Row */}
+      <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '0.85rem' }}>
+        <select 
+          className="search-input" 
+          style={{ width: 'auto', padding: '0.45rem 1rem' }}
+          value={filters.brand || 'All'}
+          onChange={handleBrandChange}
+        >
+          {brands.map(b => (
+            <option key={b} value={b}>Brand: {b}</option>
+          ))}
+        </select>
+
+        <select 
+          className="search-input" 
+          style={{ width: 'auto', padding: '0.45rem 1rem' }}
+          value={filters.condition || 'All'}
+          onChange={handleConditionChange}
+        >
+          <option value="All">Condition: All</option>
+          <option value="Mint in Box">Mint in Box</option>
+          <option value="Mint in Sealed Box">Mint in Sealed Box</option>
+          <option value="Loose Mint">Loose Mint</option>
+          <option value="Displayed">Displayed</option>
+          <option value="Custom">Custom</option>
+        </select>
+
+        <select 
+          className="search-input" 
+          style={{ width: 'auto', padding: '0.45rem 1rem' }}
+          value={filters.sort_by || 'created_at'}
+          onChange={handleSortChange}
+        >
+          <option value="created_at">Sort: Newest Added</option>
+          <option value="current_value">Sort: Est. Value (High to Low)</option>
+          <option value="purchase_price">Sort: Purchase Cost</option>
+          <option value="casting_name">Sort: Model Name (A-Z)</option>
+        </select>
+
+        {/* Favorite Bookmark Filter */}
+        <button
+          type="button"
+          className={`btn btn-secondary btn-sm ${filters.is_favorite ? 'btn-primary' : ''}`}
+          onClick={handleFavoriteToggle}
+          style={{ height: '36px' }}
+        >
+          <Star size={13} fill={filters.is_favorite ? '#ffd60a' : 'none'} color={filters.is_favorite ? '#ffd60a' : 'currentColor'} />
+          <span>Starred</span>
+        </button>
+      </div>
+
+      {/* Scale / Format Pills */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          {activeCategory === 'diecast' ? 'Scale:' : 'Format:'}
         </span>
-        <div className="segmented-control">
-          {SCALES.map((scale) => {
-            const isActive = (filters.scale || 'All') === scale;
-            return (
-              <button
-                key={scale}
-                type="button"
-                className={`segment-btn ${isActive ? 'active' : ''}`}
-                onClick={() => handleScaleSelect(scale)}
-              >
-                {scale}
-              </button>
-            );
-          })}
+        <div className="scale-segmented-control">
+          {scales.map(s => (
+            <button
+              key={s}
+              type="button"
+              className={`scale-pill-btn ${(filters.scale || 'All') === s ? 'active' : ''}`}
+              onClick={() => handleScaleSelect(s)}
+            >
+              {s}
+            </button>
+          ))}
         </div>
       </div>
     </div>

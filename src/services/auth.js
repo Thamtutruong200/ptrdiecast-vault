@@ -1,11 +1,28 @@
 /**
- * PTR MOTORSPORT - ADMIN & SPECTATOR CONSOLE AUTH SERVICE
- * Handles Owner Mode vs Public Spectator Mode permissions, PIN authentication, and privacy settings
+ * PTR MOTORSPORT - SECURE OWNER & SPECTATOR AUTH SERVICE
+ * Upgraded authentication gate without exposed default password hints
  */
 
-const DEFAULT_PIN = '1234';
-
 export const auth = {
+  // Check if Master PIN has been configured
+  isPinConfigured() {
+    try {
+      return Boolean(localStorage.getItem('ptr_admin_pin'));
+    } catch (e) {
+      return false;
+    }
+  },
+
+  // Setup Initial Master PIN / Password on first run
+  setupMasterPin(pin) {
+    if (!pin || pin.length < 4) {
+      return { success: false, error: 'PIN / Password must be at least 4 characters.' };
+    }
+    localStorage.setItem('ptr_admin_pin', pin.trim());
+    localStorage.setItem('ptr_admin_auth', 'true');
+    return { success: true };
+  },
+
   // Check if current user is logged in as Admin / Owner
   isAdmin() {
     try {
@@ -15,14 +32,19 @@ export const auth = {
     }
   },
 
-  // Authenticate Admin with PIN
+  // Authenticate Admin with PIN / Password
   login(pin) {
-    const savedPin = localStorage.getItem('ptr_admin_pin') || DEFAULT_PIN;
-    if (pin === savedPin) {
+    const savedPin = localStorage.getItem('ptr_admin_pin');
+    // If not configured yet, any valid 4+ digit setup initializes the vault
+    if (!savedPin) {
+      return this.setupMasterPin(pin);
+    }
+
+    if (pin.trim() === savedPin) {
       localStorage.setItem('ptr_admin_auth', 'true');
       return { success: true };
     }
-    return { success: false, error: 'Incorrect Admin Master PIN.' };
+    return { success: false, error: 'Access Denied: Incorrect Master Password / PIN.' };
   },
 
   // Logout back to Spectator Mode
@@ -32,14 +54,14 @@ export const auth = {
 
   // Change Admin Master PIN
   changePin(currentPin, newPin) {
-    const savedPin = localStorage.getItem('ptr_admin_pin') || DEFAULT_PIN;
-    if (currentPin !== savedPin) {
-      return { success: false, error: 'Current PIN is incorrect.' };
+    const savedPin = localStorage.getItem('ptr_admin_pin');
+    if (savedPin && currentPin !== savedPin) {
+      return { success: false, error: 'Current Master PIN is incorrect.' };
     }
     if (!newPin || newPin.length < 4) {
-      return { success: false, error: 'New PIN must be at least 4 digits.' };
+      return { success: false, error: 'New Master PIN must be at least 4 characters.' };
     }
-    localStorage.setItem('ptr_admin_pin', newPin);
+    localStorage.setItem('ptr_admin_pin', newPin.trim());
     return { success: true };
   },
 

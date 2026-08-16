@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
-  Plus, Loader2, CheckCircle2, Inbox, Smartphone, Monitor, Sparkles 
+  Plus, Loader2, CheckCircle2, Smartphone, Monitor, Sparkles 
 } from 'lucide-react';
 import { api } from './services/api';
 import { sound } from './services/soundEffects';
@@ -20,9 +20,25 @@ import ValuationInfoModal from './components/ValuationInfoModal';
 import AnalyticsModal from './components/AnalyticsModal';
 import AdminLoginModal from './components/AdminLoginModal';
 import AdminConsoleModal from './components/AdminConsoleModal';
+import ExcelSheetModal from './components/ExcelSheetModal';
+import IntroSequence from './components/IntroSequence';
 import ptrLogo from './assets/ptr-logo.png';
 
 export default function App() {
+  // Category Vault Switcher: 'diecast' | 'toys'
+  const [activeCategory, setActiveCategory] = useState('diecast');
+
+  // Theme: 'dark' | 'light'
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('ptr_theme');
+    return saved || 'dark';
+  });
+
+  // Welcoming Unboxing Intro Animation
+  const [showIntro, setShowIntro] = useState(() => {
+    return !sessionStorage.getItem('ptr_intro_seen');
+  });
+
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,6 +48,7 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(auth.isAdmin());
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
   const [isAdminConsoleOpen, setIsAdminConsoleOpen] = useState(false);
+  const [isExcelSheetOpen, setIsExcelSheetOpen] = useState(false);
 
   // View Mode: 'grid' (Gallery 4-col), 'showcase' (3D Studio), 'list' (macOS Table)
   const [viewMode, setViewMode] = useState('grid');
@@ -64,6 +81,11 @@ export default function App() {
   // Toast Notifications
   const [toasts, setToasts] = useState([]);
   const searchInputRef = useRef(null);
+
+  // Sync Theme attribute
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   const addToast = (message, type = 'success') => {
     const id = Date.now();
@@ -111,13 +133,13 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isAdmin]);
 
-  // Load items and stats
+  // Load items and stats based on category
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
       const [itemsData, statsData] = await Promise.all([
-        api.getItems(filters),
-        api.getStats()
+        api.getItems(filters, activeCategory),
+        api.getStats(activeCategory)
       ]);
       setItems(itemsData);
       setStats(statsData);
@@ -130,7 +152,7 @@ export default function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, [filters, activeCategory]);
 
   useEffect(() => {
     loadData();
@@ -139,14 +161,19 @@ export default function App() {
   // Handle Save (Create or Update)
   const handleSaveItem = async (itemData) => {
     try {
+      const payload = {
+        ...itemData,
+        category: activeCategory
+      };
+
       if (editingItem && editingItem.id) {
-        const updated = await api.updateItem(editingItem.id, itemData);
+        const updated = await api.updateItem(editingItem.id, payload);
         addToast(`Updated ${updated.casting_name}`);
         if (selectedItem && selectedItem.id === editingItem.id) {
           setSelectedItem(updated);
         }
       } else {
-        const created = await api.createItem(itemData);
+        const created = await api.createItem(payload);
         addToast(`Added ${created.casting_name} to vault`);
       }
       setIsAddModalOpen(false);
@@ -182,7 +209,7 @@ export default function App() {
       if (selectedItem && selectedItem.id === item.id) {
         setSelectedItem(updated);
       }
-      const newStats = await api.getStats();
+      const newStats = await api.getStats(activeCategory);
       setStats(newStats);
       addToast(
         updated.is_favorite 
@@ -194,8 +221,19 @@ export default function App() {
     }
   };
 
+  const handleIntroComplete = () => {
+    sessionStorage.setItem('ptr_intro_seen', 'true');
+    setShowIntro(false);
+  };
+
+  // Is any sheet or modal open for retreat animation
+  const isSheetOpen = Boolean(selectedItem || isAddModalOpen || isExportImportOpen || isValuationInfoOpen || isAnalyticsOpen || isAdminLoginOpen || isAdminConsoleOpen || isExcelSheetOpen);
+
   return (
     <>
+      {/* Cinematic Welcoming Intro Unboxing Animation */}
+      {showIntro && <IntroSequence onComplete={handleIntroComplete} />}
+
       {/* Liquid Ambient Background Fluid Orbs */}
       <div className="liquid-bg-canvas">
         <div className="liquid-orb liquid-orb-1" />
@@ -204,8 +242,8 @@ export default function App() {
         <div className="liquid-orb liquid-orb-4" />
       </div>
 
-      <div className={`app-layout layout-mode-${activeLayout}`}>
-        {/* Liquid Frosted Top Navigation */}
+      <div className={`app-layout layout-mode-${activeLayout} ${isSheetOpen ? 'modal-retreat' : ''}`}>
+        {/* Top Navigation */}
         <Navbar 
           totalCount={stats?.total_count || 0}
           onOpenAdd={() => {
@@ -221,6 +259,10 @@ export default function App() {
             sound.playSheetOpen();
             setIsAnalyticsOpen(true);
           }}
+          onOpenExcelSheet={() => {
+            sound.playSheetOpen();
+            setIsExcelSheetOpen(true);
+          }}
           onOpenAdminConsole={() => {
             sound.playSheetOpen();
             setIsAdminConsoleOpen(true);
@@ -235,6 +277,13 @@ export default function App() {
           setDeviceMode={setDeviceMode}
           isMobile={isMobile}
           isRealMobile={isRealMobile}
+          activeCategory={activeCategory}
+          setActiveCategory={(cat) => {
+            setActiveCategory(cat);
+            setFilters(prev => ({ ...prev, scale: 'All', brand: 'All' }));
+          }}
+          theme={theme}
+          setTheme={setTheme}
         />
 
         <main className="container">
@@ -255,6 +304,7 @@ export default function App() {
             viewMode={viewMode}
             setViewMode={setViewMode}
             searchInputRef={searchInputRef}
+            activeCategory={activeCategory}
           />
 
           {/* Dynamic View Modes: Gallery Grid (4-col) | 3D Showcase Stage | macOS Table List */}
@@ -262,7 +312,7 @@ export default function App() {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '6rem 0', gap: '0.85rem' }}>
               <Loader2 size={34} className="animate-spin" color="var(--apple-blue)" />
               <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
-                Updating PTR Vault telemetry...
+                Loading {activeCategory === 'diecast' ? 'PTR Motorsport' : 'Toys & Collectibles'} telemetry...
               </div>
             </div>
           ) : items.length > 0 ? (
@@ -321,12 +371,12 @@ export default function App() {
                 style={{ width: '80px', height: '80px', borderRadius: '50%', boxShadow: '0 0 30px rgba(255, 159, 10, 0.4)' }} 
               />
               <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                No Models Found in Vault
+                No {activeCategory === 'diecast' ? 'Diecast Models' : 'Toys & Sets'} Found
               </h3>
               <p style={{ maxWidth: '400px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                 {filters.q || filters.scale !== 'All' || filters.brand !== 'All' || filters.is_favorite
-                  ? 'No diecasts match your search criteria. Try adjusting your scale or brand filters.'
-                  : 'Your PTR collection vault is empty. Add your first motorsport model to start tracking.'}
+                  ? 'No items match your search criteria. Try adjusting your filters.'
+                  : `Your ${activeCategory === 'diecast' ? 'diecast motorsport' : 'toys & collectibles'} vault is empty. Add your first item.`}
               </p>
               {filters.q || filters.scale !== 'All' || filters.brand !== 'All' || filters.is_favorite ? (
                 <button 
@@ -348,7 +398,7 @@ export default function App() {
                     style={{ marginTop: '0.5rem' }}
                   >
                     <Plus size={16} strokeWidth={2.5} />
-                    <span>Add First Model</span>
+                    <span>Add First {activeCategory === 'diecast' ? 'Model' : 'Collectible'}</span>
                   </button>
                 )
               )}
@@ -370,6 +420,16 @@ export default function App() {
           >
             <Plus size={26} strokeWidth={2.5} />
           </button>
+        )}
+
+        {/* Live Excel-Style Spreadsheet Data Editor */}
+        {isExcelSheetOpen && (
+          <ExcelSheetModal 
+            items={items}
+            onClose={() => setIsExcelSheetOpen(false)}
+            onRefresh={loadData}
+            activeCategory={activeCategory}
+          />
         )}
 
         {/* Modals */}
@@ -472,6 +532,7 @@ export default function App() {
             }}
             onOpenSync={() => setIsExportImportOpen(true)}
             onOpenAnalytics={() => setIsAnalyticsOpen(true)}
+            onOpenExcelSheet={() => setIsExcelSheetOpen(true)}
           />
         )}
 

@@ -1,45 +1,43 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  X, UploadCloud, Sparkles, AlertTriangle, Check, Trash2, Camera, Loader2, Star, HelpCircle, Smartphone 
+  X, UploadCloud, Sparkles, AlertTriangle, Check, Trash2, Camera, Loader2, Star, HelpCircle 
 } from 'lucide-react';
 import { api, formatVND } from '../services/api';
 
-const SCALES = ['1:64', '1:43', '1:24', '1:18', '1:12', 'Other'];
+const DIECAST_SCALES = ['1:64', '1:43', '1:24', '1:18', '1:12', 'Other'];
+const TOY_SCALES = ['1:8', '1:60', '400%', '1000%', 'Statue', 'Figure', 'Other'];
 
-const BRANDS = [
-  'Minichamps',
-  'Hot Wheels RLC',
-  'Hot Wheels Premium',
-  'Mini GT',
-  'Inno64',
-  'Kaido House',
-  'Tarmac Works',
-  'Tomica Limited Vintage',
-  'AUTOart',
-  'Spark',
-  'Kyosho',
-  'Bburago',
-  'Matchbox Collectors',
-  'Other'
+const DIECAST_BRANDS = [
+  'Minichamps', 'Hot Wheels RLC', 'Hot Wheels Premium', 'Mini GT',
+  'Inno64', 'Kaido House', 'Tarmac Works', 'Tomica Limited Vintage',
+  'AUTOart', 'Spark', 'Kyosho', 'Bburago', 'Matchbox Collectors', 'Other'
 ];
 
-const CONDITIONS = ['Mint in Box', 'Loose Mint', 'Displayed', 'Custom', 'Fair'];
+const TOY_BRANDS = [
+  'Lego', 'Gundam / Bandai', 'Pop Mart', 'Medicom Bearbrick', 'Hot Toys', 'Good Smile Company', 'Hasbro', 'Other'
+];
+
+const CONDITIONS = ['Mint in Box', 'Mint in Sealed Box', 'Loose Mint', 'Displayed', 'Custom', 'Fair'];
 
 const VALUATION_SOURCES = [
   'Market Comps (eBay / Auctions)',
   'HobbyDB & F1 Collector Index',
+  'BrickEconomy & Collector Comps',
   'AI Vision & Collector Index',
   'Verified Appraisal Comps',
   'Retail MSRP Release',
   'Custom Collector Estimate'
 ];
 
-export default function AddItemModal({ item, onClose, onSave, onDuplicateDetected, onOpenValuationInfo, isMobile }) {
+export default function AddItemModal({ item, onClose, onSave, onDuplicateDetected, onOpenValuationInfo, isMobile, activeCategory = 'diecast' }) {
   const isEditing = Boolean(item && item.id);
+  const scales = activeCategory === 'diecast' ? DIECAST_SCALES : TOY_SCALES;
+  const brands = activeCategory === 'diecast' ? DIECAST_BRANDS : TOY_BRANDS;
 
   const [formData, setFormData] = useState({
-    brand: 'Minichamps',
-    scale: '1:43',
+    category: activeCategory,
+    brand: activeCategory === 'diecast' ? 'Minichamps' : 'Lego',
+    scale: activeCategory === 'diecast' ? '1:64' : '1:8',
     casting_name: '',
     livery: '',
     color: '',
@@ -50,6 +48,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
     valuation_source: 'Market Comps (eBay / Auctions)',
     notes: '',
     photos: [],
+    track_photos: [],
     reference_photos: [],
     is_favorite: false,
   });
@@ -64,8 +63,9 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
   useEffect(() => {
     if (item) {
       setFormData({
-        brand: item.brand || 'Minichamps',
-        scale: item.scale || '1:43',
+        category: item.category || activeCategory,
+        brand: item.brand || (activeCategory === 'diecast' ? 'Minichamps' : 'Lego'),
+        scale: item.scale || (activeCategory === 'diecast' ? '1:64' : '1:8'),
         casting_name: item.casting_name || '',
         livery: item.livery || '',
         color: item.color || '',
@@ -76,11 +76,12 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
         valuation_source: item.valuation_source || 'Market Comps (eBay / Auctions)',
         notes: item.notes || '',
         photos: item.photos || [],
+        track_photos: item.track_photos || [],
         reference_photos: item.reference_photos || [],
         is_favorite: item.is_favorite || false,
       });
     }
-  }, [item]);
+  }, [item, activeCategory]);
 
   // Debounced duplicate check
   useEffect(() => {
@@ -136,7 +137,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
   // Trigger AI Auto-Scanner
   const handleAIScan = async () => {
     if (formData.photos.length === 0) {
-      alert('Please upload or snap a photo of the car first to scan with AI.');
+      alert('Please upload or snap a photo of the item first to scan with AI.');
       return;
     }
 
@@ -178,12 +179,13 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.casting_name.trim()) {
-      alert('Casting Name is required.');
+      alert('Item Name is required.');
       return;
     }
 
     onSave({
       ...formData,
+      category: activeCategory,
       purchase_price: Number(formData.purchase_price) || 0,
       current_value: Number(formData.current_value) || 0,
     });
@@ -192,12 +194,17 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-lg" onClick={(e) => e.stopPropagation()}>
+        {/* iOS Handle Bar */}
+        <div className="sheet-handle-bar" />
+
         {/* Header */}
         <div className="modal-header">
-          <h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <Camera size={20} color="var(--apple-blue)" />
-            <span>{isEditing ? 'Edit Diecast Model' : 'New Model Entry'}</span>
-          </h2>
+            <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: 700 }}>
+              {isEditing ? `Edit ${formData.casting_name || 'Entry'}` : `New ${activeCategory === 'diecast' ? 'Diecast Model' : 'Toy Collectible'}`}
+            </h2>
+          </div>
           <button className="close-btn" onClick={onClose}>
             <X size={18} />
           </button>
@@ -209,11 +216,10 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span className="form-label">
-                Model Photos
+                Photos & Visual Proof
               </span>
               
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {/* Mobile Direct Camera Snap Button */}
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
@@ -226,7 +232,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
 
                 <button 
                   type="button" 
-                  className="btn btn-ai btn-sm"
+                  className="btn btn-primary btn-sm"
                   onClick={handleAIScan}
                   disabled={isScanningAI || formData.photos.length === 0}
                   title="Auto-fill specs & valuation from photo using AI Vision"
@@ -263,7 +269,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
               <UploadCloud size={28} color="var(--text-tertiary)" />
               <div>
                 <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
-                  {isUploading ? 'Uploading photos...' : 'Drag photos, click to browse, or snap with camera'}
+                  {isUploading ? 'Uploading photos...' : 'Drag photos, click to browse, or snap with phone camera'}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.15rem' }}>
                   High-res JPG, PNG, or WebP
@@ -323,47 +329,47 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                 onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
                 required
               >
-                {BRANDS.filter(b => b !== 'All').map(b => (
+                {brands.map(b => (
                   <option key={b} value={b}>{b}</option>
                 ))}
               </select>
             </div>
 
-            {/* Scale */}
+            {/* Scale / Format */}
             <div className="form-group">
-              <label className="form-label">Scale *</label>
+              <label className="form-label">{activeCategory === 'diecast' ? 'Scale *' : 'Format / Scale *'}</label>
               <select 
                 className="form-control"
                 value={formData.scale}
                 onChange={(e) => setFormData({ ...formData, scale: e.target.value })}
                 required
               >
-                {SCALES.filter(s => s !== 'All').map(s => (
+                {scales.map(s => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
             </div>
 
-            {/* Casting / Model Name */}
+            {/* Model / Casting Name */}
             <div className="form-group col-span-2">
-              <label className="form-label">Casting / Model Name *</label>
+              <label className="form-label">{activeCategory === 'diecast' ? 'Casting / Model Name *' : 'Collectible / Set Name *'}</label>
               <input 
                 type="text"
                 className="form-control"
-                placeholder="e.g. Minichamps Porsche 911 GT3 RS or Red Bull RB19"
+                placeholder={activeCategory === 'diecast' ? "e.g. Porsche 911 GT3 RS or Red Bull RB19" : "e.g. LEGO Technic Porsche 911 GT3 RS (42056)"}
                 value={formData.casting_name}
                 onChange={(e) => setFormData({ ...formData, casting_name: e.target.value })}
                 required
               />
             </div>
 
-            {/* Livery */}
+            {/* Livery / Edition */}
             <div className="form-group">
-              <label className="form-label">Racing Livery / Edition</label>
+              <label className="form-label">Livery / Edition / Series</label>
               <input 
                 type="text"
                 className="form-control"
-                placeholder="e.g. Weissach Package, Max Verstappen #1"
+                placeholder="e.g. Weissach Package, Ultimate Series"
                 value={formData.livery}
                 onChange={(e) => setFormData({ ...formData, livery: e.target.value })}
               />
@@ -371,23 +377,23 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
 
             {/* Color */}
             <div className="form-group">
-              <label className="form-label">Body Color</label>
+              <label className="form-label">Primary Color</label>
               <input 
                 type="text"
                 className="form-control"
-                placeholder="e.g. Ice Grey Metallic, Matte Navy"
+                placeholder="e.g. Lava Orange, Ice Grey Metallic"
                 value={formData.color}
                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
               />
             </div>
 
-            {/* Era */}
+            {/* Era / Series */}
             <div className="form-group">
               <label className="form-label">Era / Category</label>
               <input 
                 type="text"
                 className="form-control"
-                placeholder="e.g. Modern Supercar, 2023 Formula 1, 1990s JDM"
+                placeholder="e.g. Modern Supercar, Technic, JDM"
                 value={formData.era}
                 onChange={(e) => setFormData({ ...formData, era: e.target.value })}
               />
@@ -401,7 +407,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                 value={formData.condition}
                 onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
               >
-                {CONDITIONS.filter(c => c !== 'All').map(c => (
+                {CONDITIONS.map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
@@ -452,8 +458,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
             {/* Valuation Source */}
             <div className="form-group col-span-2">
               <label className="form-label">
-                <span>Valuation Provenance / Source</span>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)' }}>Basis for estimated value</span>
+                <span>Valuation Provenance / Basis</span>
               </label>
               <select 
                 className="form-control"
@@ -471,7 +476,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
               <label className="form-label">Collector Notes & Authenticity</label>
               <textarea 
                 className="form-control"
-                placeholder="Serialized edition number, opening doors, rubber tires, certificate number, etc."
+                placeholder="Serialized edition number, opening doors, rubber tires, piece count, etc."
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}

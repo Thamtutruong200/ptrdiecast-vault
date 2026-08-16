@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { 
   Plus, ArrowDownToLine, Smartphone, Monitor, PieChart, Volume2, 
-  VolumeX, Shield, Lock, Eye, Sparkles 
+  VolumeX, Shield, Lock, Eye, Sparkles, FileSpreadsheet 
 } from 'lucide-react';
 import { sound } from '../services/soundEffects';
 import ptrLogo from '../assets/ptr-logo.png';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar({ 
   totalCount, 
   onOpenAdd, 
   onOpenExportImport, 
   onOpenAnalytics,
+  onOpenExcelSheet,
   onOpenAdminConsole,
   onOpenAdminLogin,
   isAdmin,
@@ -18,7 +20,11 @@ export default function Navbar({
   deviceMode,
   setDeviceMode,
   isMobile,
-  isRealMobile
+  isRealMobile,
+  activeCategory,
+  setActiveCategory,
+  theme,
+  setTheme
 }) {
   const [isMuted, setIsMuted] = useState(sound.muted);
 
@@ -49,7 +55,7 @@ export default function Navbar({
   return (
     <header className="navbar">
       <div className="container navbar-inner">
-        {/* PTR Motorsport Brand Logo */}
+        {/* Brand Logo & Title */}
         <div className="brand-logo">
           <img 
             src={ptrLogo} 
@@ -58,12 +64,42 @@ export default function Navbar({
           />
           <div className="brand-title">
             <span>PTR Motorsport</span>
-            <span className="brand-sub">Diecast Collection Vault</span>
+            <span className="brand-sub">Vault & Collectibles</span>
           </div>
         </div>
 
+        {/* Center: Multi-Category Vault Switcher (Diecast vs Toys) */}
+        <div className="category-switcher-capsule">
+          <button
+            type="button"
+            className={`category-tab-btn ${activeCategory === 'diecast' ? 'active' : ''}`}
+            onClick={() => {
+              sound.playTap();
+              setActiveCategory('diecast');
+            }}
+          >
+            <span>🏎️</span>
+            <span>Diecast Vault</span>
+          </button>
+
+          <button
+            type="button"
+            className={`category-tab-btn ${activeCategory === 'toys' ? 'active' : ''}`}
+            onClick={() => {
+              sound.playTap();
+              setActiveCategory('toys');
+            }}
+          >
+            <span>🧸</span>
+            <span>Toys & Sets</span>
+          </button>
+        </div>
+
         {/* Action Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* Light / Dark Mode Toggle */}
+          <ThemeToggle theme={theme} setTheme={setTheme} />
+
           {/* Admin / Spectator Console Switcher Pill */}
           <button
             type="button"
@@ -83,8 +119,27 @@ export default function Navbar({
             }}
           >
             {isAdmin ? <Shield size={13} color="#34d399" /> : <Eye size={13} />}
-            <span>{isAdmin ? 'Admin Console' : 'Spectator Mode'}</span>
+            <span style={{ display: isRealMobile ? 'none' : 'inline' }}>
+              {isAdmin ? 'Admin Console' : 'Spectator'}
+            </span>
           </button>
+
+          {/* Excel Live Sheet Editor (Admin View) */}
+          {isAdmin && (
+            <button 
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => {
+                sound.playSheetOpen();
+                onOpenExcelSheet();
+              }}
+              title="Open Live Excel-Style Spreadsheet Data Editor"
+              style={{ background: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.35)', color: '#34d399' }}
+            >
+              <FileSpreadsheet size={14} />
+              <span style={{ display: isRealMobile ? 'none' : 'inline' }}>Excel Sheet</span>
+            </button>
+          )}
 
           {/* Sound FX Toggle */}
           <button 
@@ -97,67 +152,28 @@ export default function Navbar({
             {isMuted ? <VolumeX size={14} color="var(--text-tertiary)" /> : <Volume2 size={14} color="var(--apple-blue)" />}
           </button>
 
-          {/* Portfolio Analytics (Visible to Admin or when permitted) */}
-          {isAdmin && (
-            <button 
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => {
-                sound.playSheetOpen();
-                onOpenAnalytics();
-              }}
-              title="Open Collection Financial & Brand Analytics"
-            >
-              <PieChart size={14} color="var(--apple-purple)" />
-              <span style={{ display: isRealMobile ? 'none' : 'inline' }}>Analytics</span>
-            </button>
-          )}
-
-          {/* Device Switcher */}
-          <button 
-            type="button"
-            className={`device-toggle-pill ${isMobile ? 'active-mobile' : 'active-desktop'}`}
-            onClick={cycleDeviceMode}
-            title={`Active layout: ${getDeviceLabel()}. Click to toggle between Auto, Mobile, and Desktop.`}
-          >
-            {isMobile ? <Smartphone size={13} /> : <Monitor size={13} />}
-            <span style={{ display: isRealMobile ? 'none' : 'inline' }}>{getDeviceLabel()}</span>
-          </button>
-
           {/* Cloud Sync Status */}
           <div className="status-pill" title={isSupabaseConnected ? 'Connected to Supabase PostgreSQL & Storage' : 'Local Storage Mode'}>
             <span className={`status-dot ${isSupabaseConnected ? 'connected' : 'local'}`} />
             <span style={{ display: isRealMobile ? 'none' : 'inline' }}>
-              {isSupabaseConnected ? 'Cloud Sync' : 'Local Vault'}
+              {isSupabaseConnected ? 'Cloud' : 'Local'}
             </span>
           </div>
 
-          {/* Admin Operations: Sync and Add Model */}
+          {/* Admin Operations: Add Model */}
           {isAdmin && (
-            <>
-              <button 
-                className="btn btn-secondary btn-sm"
-                onClick={() => {
-                  sound.playSheetOpen();
-                  onOpenExportImport();
-                }}
-                title="Data Sync & Backup"
-              >
-                <ArrowDownToLine size={14} />
-                <span style={{ display: isRealMobile ? 'none' : 'inline' }}>Sync</span>
-              </button>
-
-              <button 
-                className="btn btn-primary btn-sm"
-                onClick={() => {
-                  sound.playSheetOpen();
-                  onOpenAdd();
-                }}
-              >
-                <Plus size={15} strokeWidth={2.5} />
-                <span>Add Model</span>
-              </button>
-            </>
+            <button 
+              className="btn btn-primary btn-sm"
+              onClick={() => {
+                sound.playSheetOpen();
+                onOpenAdd();
+              }}
+            >
+              <Plus size={15} strokeWidth={2.5} />
+              <span style={{ display: isRealMobile ? 'none' : 'inline' }}>
+                {activeCategory === 'diecast' ? 'Add Model' : 'Add Collectible'}
+              </span>
+            </button>
           )}
         </div>
       </div>

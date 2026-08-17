@@ -81,6 +81,7 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
           alt={item.casting_name} 
           className="card-image"
           loading="lazy"
+          decoding="async"
           onError={(e) => {
             e.target.src = 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=800&q=80';
           }}

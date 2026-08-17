@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense, lazy } from 'react';
 import { 
   Plus, Loader2, CheckCircle2, Smartphone, Monitor, Sparkles 
 } from 'lucide-react';
@@ -12,21 +12,23 @@ import FilterBar from './components/FilterBar';
 import ItemCard from './components/ItemCard';
 import ItemListView from './components/ItemListView';
 import ShowcaseStage from './components/ShowcaseStage';
-import ItemDetailModal from './components/ItemDetailModal';
-import AddItemModal from './components/AddItemModal';
-import DuplicateModal from './components/DuplicateModal';
-import ExportImportModal from './components/ExportImportModal';
-import ValuationInfoModal from './components/ValuationInfoModal';
-import AnalyticsModal from './components/AnalyticsModal';
-import AdminLoginModal from './components/AdminLoginModal';
-import AdminConsoleModal from './components/AdminConsoleModal';
-import ExcelSheetModal from './components/ExcelSheetModal';
-import IntroSequence from './components/IntroSequence';
-import CollectorCertificateModal from './components/CollectorCertificateModal';
-import MuseumShowroomModal from './components/MuseumShowroomModal';
 import MobileBottomNav from './components/MobileBottomNav';
+import IntroSequence from './components/IntroSequence';
 import { getSavedCurrency, saveCurrency } from './services/currency';
 import ptrLogo from './assets/ptr-logo.png';
+
+// Code-Split Dynamic Modals for Instant Zero-Lag Initial Load
+const ItemDetailModal = lazy(() => import('./components/ItemDetailModal'));
+const AddItemModal = lazy(() => import('./components/AddItemModal'));
+const DuplicateModal = lazy(() => import('./components/DuplicateModal'));
+const ExportImportModal = lazy(() => import('./components/ExportImportModal'));
+const ValuationInfoModal = lazy(() => import('./components/ValuationInfoModal'));
+const AnalyticsModal = lazy(() => import('./components/AnalyticsModal'));
+const AdminLoginModal = lazy(() => import('./components/AdminLoginModal'));
+const AdminConsoleModal = lazy(() => import('./components/AdminConsoleModal'));
+const ExcelSheetModal = lazy(() => import('./components/ExcelSheetModal'));
+const CollectorCertificateModal = lazy(() => import('./components/CollectorCertificateModal'));
+const MuseumShowroomModal = lazy(() => import('./components/MuseumShowroomModal'));
 
 export default function App() {
   // Category Vault Switcher: 'diecast' | 'toys'
@@ -506,144 +508,147 @@ export default function App() {
           isAdmin={isAdmin}
         />
 
-        {/* Live Excel-Style Spreadsheet Data Editor */}
-        {isExcelSheetOpen && (
-          <ExcelSheetModal 
-            items={items}
-            onClose={() => setIsExcelSheetOpen(false)}
-            onRefresh={loadData}
-            activeCategory={activeCategory}
-          />
-        )}
+        {/* Lazy Loaded Modals with Instant Suspense */}
+        <Suspense fallback={null}>
+          {/* Live Excel-Style Spreadsheet Data Editor */}
+          {isExcelSheetOpen && (
+            <ExcelSheetModal 
+              items={items}
+              onClose={() => setIsExcelSheetOpen(false)}
+              onRefresh={loadData}
+              activeCategory={activeCategory}
+            />
+          )}
 
-        {/* Modals */}
-        {selectedItem && (
-          <ItemDetailModal 
-            item={selectedItem}
-            onClose={() => setSelectedItem(null)}
-            onEdit={(it) => {
-              setSelectedItem(null);
-              setEditingItem(it);
-              setIsAddModalOpen(true);
-            }}
-            onDelete={handleDeleteItem}
-            onToggleFavorite={handleToggleFavorite}
-            onOpenValuationInfo={() => setIsValuationInfoOpen(true)}
-            onOpenCertificate={(it) => {
-              sound.playStar();
-              setCertificateItem(it);
-            }}
-            isAdmin={isAdmin}
-            showPrices={showPrices}
-            currency={currency}
-          />
-        )}
+          {/* Modals */}
+          {selectedItem && (
+            <ItemDetailModal 
+              item={selectedItem}
+              onClose={() => setSelectedItem(null)}
+              onEdit={(it) => {
+                setSelectedItem(null);
+                setEditingItem(it);
+                setIsAddModalOpen(true);
+              }}
+              onDelete={handleDeleteItem}
+              onToggleFavorite={handleToggleFavorite}
+              onOpenValuationInfo={() => setIsValuationInfoOpen(true)}
+              onOpenCertificate={(it) => {
+                sound.playStar();
+                setCertificateItem(it);
+              }}
+              isAdmin={isAdmin}
+              showPrices={showPrices}
+              currency={currency}
+            />
+          )}
 
-        {isAddModalOpen && (
-          <AddItemModal 
-            item={editingItem}
-            onClose={() => {
-              setIsAddModalOpen(false);
-              setEditingItem(null);
-            }}
-            onSave={handleSaveItem}
-            onDuplicateDetected={(existing, newData) => {
-              setDuplicateModalData({ existing, newData });
-            }}
-            onOpenValuationInfo={() => setIsValuationInfoOpen(true)}
-            isMobile={isMobile}
-          />
-        )}
+          {isAddModalOpen && (
+            <AddItemModal 
+              item={editingItem}
+              onClose={() => {
+                setIsAddModalOpen(false);
+                setEditingItem(null);
+              }}
+              onSave={handleSaveItem}
+              onDuplicateDetected={(existing, newData) => {
+                setDuplicateModalData({ existing, newData });
+              }}
+              onOpenValuationInfo={() => setIsValuationInfoOpen(true)}
+              isMobile={isMobile}
+            />
+          )}
 
-        {duplicateModalData && (
-          <DuplicateModal 
-            existingItem={duplicateModalData.existing}
-            newItemData={duplicateModalData.newData}
-            onConfirmAdd={() => {
-              handleSaveItem(duplicateModalData.newData);
-              setDuplicateModalData(null);
-            }}
-            onCancel={() => setDuplicateModalData(null)}
-          />
-        )}
+          {duplicateModalData && (
+            <DuplicateModal 
+              existingItem={duplicateModalData.existing}
+              newItemData={duplicateModalData.newData}
+              onConfirmAdd={() => {
+                handleSaveItem(duplicateModalData.newData);
+                setDuplicateModalData(null);
+              }}
+              onCancel={() => setDuplicateModalData(null)}
+            />
+          )}
 
-        {isExportImportOpen && (
-          <ExportImportModal 
-            items={items}
-            onClose={() => setIsExportImportOpen(false)}
-            onRefresh={loadData}
-          />
-        )}
+          {isExportImportOpen && (
+            <ExportImportModal 
+              items={items}
+              onClose={() => setIsExportImportOpen(false)}
+              onRefresh={loadData}
+            />
+          )}
 
-        {/* Valuation Methodology Modal */}
-        {isValuationInfoOpen && (
-          <ValuationInfoModal 
-            onClose={() => setIsValuationInfoOpen(false)}
-          />
-        )}
+          {/* Valuation Methodology Modal */}
+          {isValuationInfoOpen && (
+            <ValuationInfoModal 
+              onClose={() => setIsValuationInfoOpen(false)}
+            />
+          )}
 
-        {/* Collection Analytics Modal */}
-        {isAnalyticsOpen && (
-          <AnalyticsModal 
-            stats={stats}
-            items={items}
-            onClose={() => setIsAnalyticsOpen(false)}
-            onSelectCar={(it) => {
-              sound.playSheetOpen();
-              setSelectedItem(it);
-            }}
-          />
-        )}
+          {/* Collection Analytics Modal */}
+          {isAnalyticsOpen && (
+            <AnalyticsModal 
+              stats={stats}
+              items={items}
+              onClose={() => setIsAnalyticsOpen(false)}
+              onSelectCar={(it) => {
+                sound.playSheetOpen();
+                setSelectedItem(it);
+              }}
+            />
+          )}
 
-        {/* Admin Login PIN Modal */}
-        {isAdminLoginOpen && (
-          <AdminLoginModal 
-            onClose={() => setIsAdminLoginOpen(false)}
-            onLoginSuccess={() => {
-              setIsAdmin(true);
-              addToast('Admin Console Unlocked', 'success');
-            }}
-          />
-        )}
+          {/* Admin Login PIN Modal */}
+          {isAdminLoginOpen && (
+            <AdminLoginModal 
+              onClose={() => setIsAdminLoginOpen(false)}
+              onLoginSuccess={() => {
+                setIsAdmin(true);
+                addToast?.('Admin Console Unlocked', 'success');
+              }}
+            />
+          )}
 
-        {/* Admin Console Sheet Modal */}
-        {isAdminConsoleOpen && (
-          <AdminConsoleModal 
-            items={items}
-            stats={stats}
-            onClose={() => setIsAdminConsoleOpen(false)}
-            onSwitchToSpectator={() => {
-              auth.logout();
-              setIsAdmin(false);
-              addToast('Switched to Public Spectator Mode', 'success');
-            }}
-            onOpenAdd={() => {
-              setEditingItem(null);
-              setIsAddModalOpen(true);
-            }}
-            onOpenSync={() => setIsExportImportOpen(true)}
-            onOpenAnalytics={() => setIsAnalyticsOpen(true)}
-            onOpenExcelSheet={() => setIsExcelSheetOpen(true)}
-          />
-        )}
+          {/* Admin Console Sheet Modal */}
+          {isAdminConsoleOpen && (
+            <AdminConsoleModal 
+              items={items}
+              stats={stats}
+              onClose={() => setIsAdminConsoleOpen(false)}
+              onSwitchToSpectator={() => {
+                auth.logout();
+                setIsAdmin(false);
+                addToast?.('Switched to Public Spectator Mode', 'success');
+              }}
+              onOpenAdd={() => {
+                setEditingItem(null);
+                setIsAddModalOpen(true);
+              }}
+              onOpenSync={() => setIsExportImportOpen(true)}
+              onOpenAnalytics={() => setIsAnalyticsOpen(true)}
+              onOpenExcelSheet={() => setIsExcelSheetOpen(true)}
+            />
+          )}
 
-        {/* Sotheby's / Apple Style Collector Certificate of Authenticity */}
-        {certificateItem && (
-          <CollectorCertificateModal 
-            item={certificateItem}
-            onClose={() => setCertificateItem(null)}
-            currency={currency}
-          />
-        )}
+          {/* Sotheby's / Apple Style Collector Certificate of Authenticity */}
+          {certificateItem && (
+            <CollectorCertificateModal 
+              item={certificateItem}
+              onClose={() => setCertificateItem(null)}
+              currency={currency}
+            />
+          )}
 
-        {/* Museum Showroom Fullscreen Kiosk Mode (Press F) */}
-        {isShowroomOpen && (
-          <MuseumShowroomModal 
-            items={items}
-            onClose={() => setIsShowroomOpen(false)}
-            currency={currency}
-          />
-        )}
+          {/* Museum Showroom Fullscreen Kiosk Mode (Press F) */}
+          {isShowroomOpen && (
+            <MuseumShowroomModal 
+              items={items}
+              onClose={() => setIsShowroomOpen(false)}
+              currency={currency}
+            />
+          )}
+        </Suspense>
 
         {/* Floating Liquid Toast Capsule */}
         <div className="toast-container">

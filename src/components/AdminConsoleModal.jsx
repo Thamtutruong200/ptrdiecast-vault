@@ -128,7 +128,7 @@ export default function AdminConsoleModal({
             </div>
 
             {/* 3 Real-time Metric Cards Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.85rem', marginBottom: '1rem' }}>
+            <div className="admin-telemetry-grid">
               
               {/* Card 1: Supabase Database Capacity */}
               <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '0.85rem' }}>
@@ -221,7 +221,7 @@ export default function AdminConsoleModal({
             <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
               Vault Management & Operations
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+            <div className="admin-ops-grid">
               {/* Action 1: Excel Live Sheet */}
               <button 
                 className="stat-card" 
@@ -337,7 +337,7 @@ export default function AdminConsoleModal({
               Spectator Console Privacy Controls
             </h3>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)', gap: '0.5rem' }}>
               <div>
                 <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                   Hide Paid Costs & Valuations in Spectator Mode
@@ -350,11 +350,11 @@ export default function AdminConsoleModal({
                 type="checkbox"
                 checked={hidePrices}
                 onChange={handleToggleHidePrices}
-                style={{ width: 20, height: 20, cursor: 'pointer', accentColor: 'var(--apple-blue)' }}
+                style={{ width: 20, height: 20, cursor: 'pointer', accentColor: 'var(--apple-blue)', flexShrink: 0 }}
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                 Active Mode: <strong>Admin (Unlocked)</strong>
               </span>
@@ -390,8 +390,8 @@ export default function AdminConsoleModal({
               </div>
             )}
 
-            <form onSubmit={handleChangePin} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.75rem', alignItems: 'flex-end' }}>
-              <div>
+            <form onSubmit={handleChangePin} className="admin-pin-form">
+              <div style={{ flex: 1 }}>
                 <label className="form-label" style={{ fontSize: '0.75rem' }}>Current Password</label>
                 <input 
                   type="password"
@@ -403,7 +403,7 @@ export default function AdminConsoleModal({
                 />
               </div>
 
-              <div>
+              <div style={{ flex: 1 }}>
                 <label className="form-label" style={{ fontSize: '0.75rem' }}>New Password (min 4 chars)</label>
                 <input 
                   type="password"
@@ -415,14 +415,14 @@ export default function AdminConsoleModal({
                 />
               </div>
 
-              <button type="submit" className="btn btn-secondary btn-sm" style={{ height: '42px' }}>
+              <button type="submit" className="btn btn-secondary btn-sm" style={{ height: '42px', alignSelf: 'flex-end', width: 'auto' }}>
                 <KeyRound size={14} />
                 <span>Update</span>
               </button>
             </form>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+          <div className="admin-console-footer">
             <button 
               type="button"
               className="btn btn-secondary btn-sm"
@@ -436,7 +436,7 @@ export default function AdminConsoleModal({
               <Eye size={14} />
               <span>Lock & Return to Spectator Mode</span>
             </button>
-            <button className="btn btn-primary btn-sm" onClick={onClose}>
+            <button className="btn btn-primary btn-sm" onClick={onClose} style={{ minWidth: '80px' }}>
               Done
             </button>
           </div>

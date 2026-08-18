@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  X, UploadCloud, Sparkles, AlertTriangle, Check, Trash2, Camera, Loader2, Star, HelpCircle, Layers, DollarSign, FileText, Image as ImageIcon 
+  X, UploadCloud, Sparkles, AlertTriangle, Check, Trash2, Camera, Loader2, Star, HelpCircle, Layers, DollarSign, FileText, Image as ImageIcon, Crop 
 } from 'lucide-react';
 import { api, formatVND } from '../services/api';
 import { sound } from '../services/soundEffects';
+import ImageCropperModal from './ImageCropperModal';
 
 const DIECAST_SCALES = ['1:64', '1:43', '1:24', '1:18', '1:12', 'Other'];
 const TOY_SCALES = ['1:8', '1:60', '400%', '1000%', 'Statue', 'Figure', 'Other'];
@@ -59,10 +60,13 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
   const [modelPhotoUrlInput, setModelPhotoUrlInput] = useState('');
   const [trackPhotoUrlInput, setTrackPhotoUrlInput] = useState('');
   const [duplicateMatches, setDuplicateMatches] = useState([]);
+  const [cropperData, setCropperData] = useState(null); // { imageSrc, targetType: 'model'|'track', indexToReplace }
   
   const fileInputRef = useRef(null);
+  const cropFileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const trackFileInputRef = useRef(null);
+  const trackCropFileInputRef = useRef(null);
 
   useEffect(() => {
     if (item) {
@@ -115,11 +119,65 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
     return () => clearTimeout(timer);
   }, [formData.casting_name, formData.brand, formData.livery, item]);
 
-  // Handle Model Photo File Upload
+  // Handle Direct Upload and Open Cropper
+  const handleSelectAndCrop = (e, targetType = 'model') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    sound.playTap();
+    setCropperData({
+      imageSrc: file,
+      targetType,
+      indexToReplace: null
+    });
+    // Reset file input so same file can be selected again if needed
+    e.target.value = '';
+  };
+
+  // Handle Cropper Completion & Cloud Upload
+  const handleCropperComplete = async (croppedFile, previewDataUrl) => {
+    if (!cropperData) return;
+    const { targetType, indexToReplace } = cropperData;
+    setCropperData(null);
+
+    setIsUploading(true);
+    try {
+      const res = await api.uploadPhoto(croppedFile);
+      const finalUrl = res.url || previewDataUrl;
+
+      if (targetType === 'model') {
+        setFormData(prev => {
+          if (indexToReplace !== null && indexToReplace >= 0) {
+            const updated = [...prev.photos];
+            updated[indexToReplace] = finalUrl;
+            return { ...prev, photos: updated };
+          } else {
+            return { ...prev, photos: [...prev.photos, finalUrl] };
+          }
+        });
+      } else {
+        setFormData(prev => {
+          if (indexToReplace !== null && indexToReplace >= 0) {
+            const updated = [...prev.track_photos];
+            updated[indexToReplace] = finalUrl;
+            return { ...prev, track_photos: updated };
+          } else {
+            return { ...prev, track_photos: [...prev.track_photos, finalUrl] };
+          }
+        });
+      }
+    } catch (err) {
+      alert('Upload error after cropping: ' + err.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Handle Model Photo File Upload (Direct Batch)
   const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
+    // If 1 file uploaded and user might want to crop, we can also let them crop from thumbnail
     setIsUploading(true);
     try {
       const uploadPromises = files.map(f => api.uploadPhoto(f));
@@ -242,7 +300,17 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                 <span>1. Vault Model Photos ({formData.photos.length})</span>
               </div>
               
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => cropFileInputRef.current?.click()}
+                  title="Choose photo and crop to custom aspect ratio"
+                  style={{ color: 'var(--apple-blue)', borderColor: 'rgba(10, 132, 255, 0.45)', background: 'rgba(10, 132, 255, 0.08)' }}
+                >
+                  <Crop size={13} />
+                  <span>Upload & Crop</span>
+                </button>
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
@@ -259,7 +327,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                   title="Upload from computer"
                 >
                   <UploadCloud size={13} />
-                  <span>Upload Model Photos</span>
+                  <span>Upload Direct</span>
                 </button>
               </div>
             </div>
@@ -275,8 +343,15 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
             />
             <input 
               type="file" 
+              ref={cropFileInputRef} 
+              onChange={(e) => handleSelectAndCrop(e, 'model')} 
+              accept="image/*" 
+              style={{ display: 'none' }} 
+            />
+            <input 
+              type="file" 
               ref={cameraInputRef} 
-              onChange={handleFileUpload} 
+              onChange={(e) => handleSelectAndCrop(e, 'model')} 
               accept="image/*" 
               capture="environment" 
               style={{ display: 'none' }} 
@@ -285,16 +360,16 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
             {/* Dropzone */}
             <div 
               className="upload-dropzone"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => cropFileInputRef.current?.click()}
             >
               <UploadCloud size={26} color="var(--apple-blue)" />
               <div>
                 <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
-                  {isUploading ? 'Compressing & uploading model photos to Supabase...' : 'Click to Upload Physical Scale Model Photos'}
+                  {isUploading ? 'Compressing & uploading model photos to Supabase...' : 'Click to Upload & Crop Scale Model Photos'}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: '#34d399', marginTop: '0.2rem', fontWeight: 600 }}>
                   <Sparkles size={11} />
-                  <span>⚡ In-Browser Auto-Compressor (~250 KB – 400 KB, Max 1920px)</span>
+                  <span>⚡ Interactive Cropper • 4:3 Gallery Ratio • Auto-Compressor</span>
                 </div>
               </div>
             </div>
@@ -333,6 +408,18 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                     <img src={url} alt="Uploaded model preview" />
                     <button 
                       type="button" 
+                      className="upload-thumb-crop"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        sound.playTap();
+                        setCropperData({ imageSrc: url, targetType: 'model', indexToReplace: idx });
+                      }}
+                      title="Crop & adjust photo"
+                    >
+                      <Crop size={11} />
+                    </button>
+                    <button 
+                      type="button" 
                       className="upload-thumb-remove"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -361,19 +448,31 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                 </p>
               </div>
               
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => trackFileInputRef.current?.click()}
-                title="Upload real race photos"
-                style={{ color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.4)' }}
-              >
-                <UploadCloud size={13} />
-                <span>Upload Track Photos</span>
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => trackCropFileInputRef.current?.click()}
+                  title="Upload and crop track photos"
+                  style={{ color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.45)', background: 'rgba(255, 159, 10, 0.08)' }}
+                >
+                  <Crop size={13} />
+                  <span>Upload & Crop</span>
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => trackFileInputRef.current?.click()}
+                  title="Upload real race photos"
+                  style={{ color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.4)' }}
+                >
+                  <UploadCloud size={13} />
+                  <span>Upload Direct</span>
+                </button>
+              </div>
             </div>
 
-            {/* Hidden Track File Input */}
+            {/* Hidden Track File Inputs */}
             <input 
               type="file" 
               ref={trackFileInputRef} 
@@ -382,20 +481,27 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
               accept="image/*" 
               style={{ display: 'none' }} 
             />
+            <input 
+              type="file" 
+              ref={trackCropFileInputRef} 
+              onChange={(e) => handleSelectAndCrop(e, 'track')} 
+              accept="image/*" 
+              style={{ display: 'none' }} 
+            />
 
             {/* Track Dropzone */}
             <div 
               className="upload-dropzone"
-              onClick={() => trackFileInputRef.current?.click()}
+              onClick={() => trackCropFileInputRef.current?.click()}
               style={{ borderColor: 'rgba(255, 159, 10, 0.35)' }}
             >
               <span style={{ fontSize: '1.5rem' }}>🏎️</span>
               <div>
                 <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
-                  {isTrackUploading ? 'Compressing & uploading race track photos...' : 'Click to Upload Real 1:1 Race Car / Track Action Photos'}
+                  {isTrackUploading ? 'Compressing & uploading race track photos...' : 'Click to Upload & Crop Real 1:1 Race Car Photos'}
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-                  Upload photos of the real car at Le Mans, Monaco GP, Nürburgring, or IMSA
+                  Upload & frame photos of the real car at Le Mans, Monaco GP, Nürburgring, or IMSA
                 </div>
               </div>
             </div>
@@ -432,6 +538,18 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                 {formData.track_photos.map((url, idx) => (
                   <div key={idx} className="upload-thumb" style={{ borderColor: 'rgba(255, 159, 10, 0.5)' }}>
                     <img src={url} alt="Track preview" />
+                    <button 
+                      type="button" 
+                      className="upload-thumb-crop"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        sound.playTap();
+                        setCropperData({ imageSrc: url, targetType: 'track', indexToReplace: idx });
+                      }}
+                      title="Crop & adjust track photo"
+                    >
+                      <Crop size={11} />
+                    </button>
                     <button 
                       type="button" 
                       className="upload-thumb-remove"
@@ -633,6 +751,16 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
           </div>
         </form>
       </div>
+
+      {/* Interactive Image Cropper Tool Modal */}
+      {cropperData && (
+        <ImageCropperModal
+          imageSrc={cropperData.imageSrc}
+          onCropComplete={handleCropperComplete}
+          onCancel={() => setCropperData(null)}
+          initialAspectRatio={cropperData.targetType === 'model' ? 4 / 3 : 16 / 9}
+        />
+      )}
     </div>
   );
 }

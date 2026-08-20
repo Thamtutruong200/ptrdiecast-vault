@@ -124,13 +124,13 @@ export default function ItemCard({ item, onSelect, onToggleFavorite }) {
         {/* Tags */}
         <div className="card-tags">
           {driver && (
-            <span className="apple-tag" style={{ color: 'var(--apple-blue)', borderColor: 'rgba(10, 132, 255, 0.28)', background: 'rgba(10, 132, 255, 0.08)' }} title={`Driver: ${driver}`}>
+            <span className="apple-tag" style={{ color: 'var(--apple-blue)', background: 'rgba(10, 132, 255, 0.12)' }} title={`Driver: ${driver}`}>
               <User size={11} strokeWidth={2.2} />
               <span>{driver}</span>
             </span>
           )}
           {year && (
-            <span className="apple-tag" style={{ color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.28)', background: 'rgba(255, 159, 10, 0.08)' }} title={`Year / Racing Season: ${year}`}>
+            <span className="apple-tag" style={{ color: 'var(--apple-amber)', background: 'rgba(255, 159, 10, 0.12)' }} title={`Year / Racing Season: ${year}`}>
               <Calendar size={11} strokeWidth={2.2} />
               <span>{year}</span>
             </span>
@@ -142,7 +142,7 @@ export default function ItemCard({ item, onSelect, onToggleFavorite }) {
             </span>
           )}
           {item.era && (
-            <span className="apple-tag" style={{ color: 'var(--apple-purple)', borderColor: 'rgba(191, 90, 242, 0.25)' }}>
+            <span className="apple-tag" style={{ color: 'var(--apple-purple)', background: 'rgba(191, 90, 242, 0.12)' }}>
               <span>{item.era}</span>
             </span>
           )}

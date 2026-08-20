@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Layers, Star, Sparkles, PieChart, Shield, Eye, 
-  Plus, Home, Smartphone, Compass 
+  Plus, Home, Smartphone, Compass, Box
 } from 'lucide-react';
 import { sound } from '../services/soundEffects';
 
@@ -42,7 +42,7 @@ export default function MobileBottomNav({
           className={`mobile-nav-item ${!isFavoritesOnly && activeCategory === 'diecast' ? 'active' : ''}`}
           onClick={() => handleSwitchCategory('diecast')}
         >
-          <span className="mobile-nav-icon">🏎️</span>
+          <Layers size={19} strokeWidth={2.2} />
           <span className="mobile-nav-label">Diecast</span>
         </button>
 
@@ -52,7 +52,7 @@ export default function MobileBottomNav({
           className={`mobile-nav-item ${!isFavoritesOnly && activeCategory === 'toys' ? 'active' : ''}`}
           onClick={() => handleSwitchCategory('toys')}
         >
-          <span className="mobile-nav-icon">🧸</span>
+          <Box size={19} strokeWidth={2.2} />
           <span className="mobile-nav-label">Toys</span>
         </button>
 

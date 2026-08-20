@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { 
-  Plus, ArrowDownToLine, Smartphone, Monitor, PieChart, Volume2, 
-  VolumeX, Shield, Lock, Eye, Sparkles, FileSpreadsheet 
+  Plus, Smartphone, Monitor, PieChart, Volume2, 
+  VolumeX, Shield, Lock, Eye, Sparkles, FileSpreadsheet,
+  Layers, Box, Landmark
 } from 'lucide-react';
 import { sound } from '../services/soundEffects';
 import ptrLogo from '../assets/ptr-logo.png';
@@ -25,8 +26,6 @@ export default function Navbar({
   setActiveCategory,
   theme,
   setTheme,
-  currency = 'VND',
-  onCurrencyChange,
   onOpenShowroom
 }) {
   const [isMuted, setIsMuted] = useState(sound.muted);
@@ -35,24 +34,6 @@ export default function Navbar({
     const muted = sound.toggleMute();
     setIsMuted(muted);
     if (!muted) sound.playTap();
-  };
-
-  const cycleDeviceMode = () => {
-    sound.playTap();
-    if (deviceMode === 'auto') {
-      setDeviceMode('mobile');
-    } else if (deviceMode === 'mobile') {
-      setDeviceMode('desktop');
-    } else {
-      setDeviceMode('auto');
-    }
-  };
-
-  const getDeviceLabel = () => {
-    if (deviceMode === 'auto') {
-      return isRealMobile ? 'Auto: Mobile' : 'Auto: Desktop';
-    }
-    return deviceMode === 'mobile' ? 'Mobile View' : 'Desktop View';
   };
 
   return (
@@ -66,8 +47,8 @@ export default function Navbar({
             className="brand-logo-img"
           />
           <div className="brand-title">
-            <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
-              PTr's Collectibles
+            <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '-0.02em', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)' }}>
+              PTr Motorsport Vault
             </span>
           </div>
         </div>
@@ -82,7 +63,7 @@ export default function Navbar({
               setActiveCategory('diecast');
             }}
           >
-            <span>🏎️</span>
+            <Layers size={13} strokeWidth={2.2} />
             <span>Diecast Vault</span>
           </button>
 
@@ -94,7 +75,7 @@ export default function Navbar({
               setActiveCategory('toys');
             }}
           >
-            <span>🧸</span>
+            <Box size={13} strokeWidth={2.2} />
             <span>Toys & Sets</span>
           </button>
         </div>
@@ -111,9 +92,9 @@ export default function Navbar({
                 onOpenShowroom && onOpenShowroom();
               }}
               title="Open Fullscreen Museum Kiosk Presentation (Shortcut: F)"
-              style={{ borderRadius: 'var(--radius-pill)', borderColor: 'rgba(212, 175, 55, 0.35)', color: '#d4af37' }}
+              style={{ borderRadius: 'var(--radius-pill)', borderColor: 'rgba(212, 175, 55, 0.35)', color: '#d4af37', gap: '0.35rem' }}
             >
-              <span>🏛️</span>
+              <Landmark size={13} strokeWidth={2} />
               <span>Showroom</span>
             </button>
           )}

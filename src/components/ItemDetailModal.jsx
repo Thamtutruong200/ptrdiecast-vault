@@ -116,7 +116,7 @@ export default function ItemDetailModal({
                   onClick={() => switchTab('track')}
                 >
                   <Flag size={13} style={{ display: 'inline', marginRight: 4, color: 'var(--apple-amber)' }} />
-                  <span>🏁 Real Race Track ({trackPhotos.length})</span>
+                  <span>Track Heritage ({trackPhotos.length})</span>
                 </button>
               </div>
 

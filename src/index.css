@@ -34,7 +34,8 @@
   --apple-red: #ff453a;
 
   /* Typography & Radii */
-  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  --font-display: "Outfit", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", Menlo, Monaco, Consolas, monospace;
   
   --radius-xs: 6px;
@@ -490,10 +491,12 @@ body {
 }
 
 .stat-number {
-  font-size: 1.65rem;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
   font-weight: 800;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .stat-sub {
@@ -655,14 +658,18 @@ body {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(8, 12, 20, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: var(--radius-pill);
-  padding: 0.2rem 0.55rem;
-  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
   font-weight: 700;
-  color: #fff;
+  letter-spacing: 0.04em;
+  color: #f8fafc;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   z-index: 2;
 }
 
@@ -673,22 +680,29 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(8, 12, 20, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 2;
 }
 
+.fav-capsule:hover {
+  transform: scale(1.08);
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(15, 22, 36, 0.9);
+}
+
 .fav-capsule.favorited {
-  background: rgba(255, 214, 10, 0.25);
+  background: rgba(255, 214, 10, 0.2);
   color: var(--apple-amber);
-  border-color: rgba(255, 214, 10, 0.5);
+  border-color: rgba(255, 214, 10, 0.45);
 }
 
 .card-body {
@@ -703,16 +717,18 @@ body {
   font-weight: 700;
   color: var(--apple-blue);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   margin-bottom: 0.2rem;
 }
 
 .card-title {
-  font-size: 1rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--text-primary);
-  line-height: 1.3;
-  margin-bottom: 0.4rem;
+  line-height: 1.28;
+  margin-bottom: 0.35rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -729,8 +745,8 @@ body {
 }
 
 .card-livery-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--apple-amber);
   flex-shrink: 0;
@@ -739,7 +755,7 @@ body {
 .card-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 0.35rem;
   margin-top: auto;
   margin-bottom: 0.85rem;
 }
@@ -747,14 +763,16 @@ body {
 .apple-tag {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--radius-xs);
+  gap: 0.32rem;
+  padding: 0.22rem 0.6rem;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.04);
-  border: var(--glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-secondary);
+  letter-spacing: 0.01em;
+  transition: all 0.15s ease;
 }
 
 .card-footer {
@@ -2037,3 +2055,148 @@ textarea.form-control {
     transform: translateY(-2px) scale(0.94);
   }
 }
+
+/* ============================================================================
+   PAGINATION CONTROL SYSTEM
+   ============================================================================ */
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  margin-top: 2rem;
+  margin-bottom: 2.5rem;
+  background: var(--bg-glass-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-subtle), var(--glass-specular);
+  flex-wrap: wrap;
+}
+
+.pagination-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.pagination-info-range {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pagination-info-total {
+  font-weight: 700;
+  color: var(--apple-blue);
+}
+
+.pagination-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--bg-surface-elevated);
+  padding: 0.25rem;
+  border-radius: var(--radius-pill);
+  border: var(--glass-border);
+  box-shadow: var(--glass-specular);
+}
+
+.pagination-pages {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pagination-number-btn.active {
+  background: var(--apple-blue);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(10, 132, 255, 0.45);
+}
+
+.pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 32px;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+}
+
+.pagination-size-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-size-select {
+  background: var(--bg-surface-elevated);
+  border: var(--glass-border);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-size-select:focus {
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 0 2px var(--apple-blue-dim);
+}
+
+@media (max-width: 768px) {
+  .pagination-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 5.5rem;
+  }
+
+  .pagination-controls {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

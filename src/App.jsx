@@ -14,6 +14,7 @@ import ItemListView from './components/ItemListView';
 import ShowcaseStage from './components/ShowcaseStage';
 import MobileBottomNav from './components/MobileBottomNav';
 import IntroSequence from './components/IntroSequence';
+import Pagination from './components/Pagination';
 import { getSavedCurrency, saveCurrency } from './services/currency';
 import ptrLogo from './assets/ptr-logo.png';
 
@@ -94,6 +95,15 @@ export default function App() {
   // Toast Notifications
   const [toasts, setToasts] = useState([]);
   const searchInputRef = useRef(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(24);
+
+  // Auto-reset to Page 1 on filter or category change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, activeCategory]);
 
   const addToast = (message, type = 'success') => {
     const id = Date.now();
@@ -410,39 +420,54 @@ export default function App() {
               </div>
             </div>
           ) : items.length > 0 ? (
-            viewMode === 'list' ? (
-              /* View 1: macOS Finder Compact Table List */
-              <ItemListView 
-                items={items}
-                onSelect={(it) => {
-                  sound.playSheetOpen();
-                  setSelectedItem(it);
+            <>
+              {viewMode === 'list' ? (
+                /* View 1: macOS Finder Compact Table List */
+                <ItemListView 
+                  items={pageSize === 'All' || pageSize === 'all' ? items : items.slice((currentPage - 1) * Number(pageSize), currentPage * Number(pageSize))}
+                  onSelect={(it) => {
+                    sound.playSheetOpen();
+                    setSelectedItem(it);
+                  }}
+                  onEdit={(it) => {
+                    sound.playSheetOpen();
+                    setEditingItem(it);
+                    setIsAddModalOpen(true);
+                  }}
+                  onDelete={handleDeleteItem}
+                  onToggleFavorite={handleToggleFavorite}
+                  isAdmin={isAdmin}
+                />
+              ) : (
+                /* View 2: 4 Cars Per Row Liquid Glass Gallery Grid with 3D Physics */
+                <div className="items-grid">
+                  {(pageSize === 'All' || pageSize === 'all' ? items : items.slice((currentPage - 1) * Number(pageSize), currentPage * Number(pageSize))).map((item) => (
+                    <ItemCard
+                      key={item.id}
+                      item={item}
+                      onSelect={(it) => {
+                        sound.playSheetOpen();
+                        setSelectedItem(it);
+                      }}
+                      onToggleFavorite={handleToggleFavorite}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Luxury Pagination Control System */}
+              <Pagination
+                currentPage={currentPage}
+                totalItems={items.length}
+                pageSize={pageSize}
+                onPageChange={(page) => setCurrentPage(page)}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
                 }}
-                onEdit={(it) => {
-                  sound.playSheetOpen();
-                  setEditingItem(it);
-                  setIsAddModalOpen(true);
-                }}
-                onDelete={handleDeleteItem}
-                onToggleFavorite={handleToggleFavorite}
-                isAdmin={isAdmin}
+                pageSizeOptions={[16, 24, 48, 96, 'All']}
               />
-            ) : (
-              /* View 2: 4 Cars Per Row Liquid Glass Gallery Grid with 3D Physics */
-              <div className="items-grid">
-                {items.map((item) => (
-                  <ItemCard
-                    key={item.id}
-                    item={item}
-                    onSelect={(it) => {
-                      sound.playSheetOpen();
-                      setSelectedItem(it);
-                    }}
-                    onToggleFavorite={handleToggleFavorite}
-                  />
-                ))}
-              </div>
-            )
+            </>
           ) : (
             /* Liquid Empty State with Mascot */
             <div className="empty-state">

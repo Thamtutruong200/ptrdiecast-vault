@@ -247,10 +247,10 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
 
     let enrichedNotes = formData.notes || '';
     if (formData.driver && !enrichedNotes.toLowerCase().includes('driver:')) {
-      enrichedNotes = `🏎️ Driver: ${formData.driver.trim()}` + (enrichedNotes ? '\n' + enrichedNotes : '');
+      enrichedNotes = `Driver: ${formData.driver.trim()}` + (enrichedNotes ? '\n' + enrichedNotes : '');
     }
     if (formData.year && !enrichedNotes.toLowerCase().includes('year:')) {
-      enrichedNotes = `📅 Year: ${formData.year.trim()}` + (enrichedNotes ? '\n' + enrichedNotes : '');
+      enrichedNotes = `Year: ${formData.year.trim()}` + (enrichedNotes ? '\n' + enrichedNotes : '');
     }
 
     onSave({
@@ -272,11 +272,11 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
               <Camera size={18} color="var(--apple-blue)" />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', fontWeight: 800, letterSpacing: '-0.02em' }}>
+              <h2 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', fontWeight: 800, letterSpacing: '-0.02em', fontFamily: 'var(--font-display)' }}>
                 {isEditing ? `Edit Entry: ${formData.casting_name || 'Item'}` : `Add New ${activeCategory === 'diecast' ? 'Diecast Model' : 'Toy Collectible'}`}
               </h2>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                {activeCategory === 'diecast' ? '🏎️ PTR Motorsport Vault' : '🧸 Toys & Designer Art Sets'}
+                {activeCategory === 'diecast' ? 'PTR Motorsport Archive Vault' : 'Designer Art & Toy Sets'}
               </p>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Star, Tag, Sparkles } from 'lucide-react';
+import { Star, Tag, User, Calendar, Sparkles, ArrowUpRight } from 'lucide-react';
 import { BrandBadge } from '../services/brandLogos';
 
 export default function ItemCard({ item, onSelect, onToggleFavorite }) {
@@ -18,13 +18,13 @@ export default function ItemCard({ item, onSelect, onToggleFavorite }) {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
     
-    // Smooth subtle 3D tilt max 8 degrees
-    const rotateX = ((y - centerY) / centerY) * -7;
-    const rotateY = ((x - centerX) / centerX) * 7;
+    // Smooth subtle 3D tilt max 6 degrees
+    const rotateX = ((y - centerY) / centerY) * -5.5;
+    const rotateY = ((x - centerX) / centerX) * 5.5;
     const glareX = (x / rect.width) * 100;
     const glareY = (y / rect.height) * 100;
 
-    setTilt({ x: rotateX, y: rotateY, glareX, glareY, opacity: 0.15 });
+    setTilt({ x: rotateX, y: rotateY, glareX, glareY, opacity: 0.12 });
   };
 
   const handleMouseLeave = () => {
@@ -50,8 +50,8 @@ export default function ItemCard({ item, onSelect, onToggleFavorite }) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{
-        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateY(${tilt.opacity > 0 ? '-4px' : '0px'})`,
-        transition: tilt.opacity > 0 ? 'transform 0.1s ease-out' : 'transform 0.4s ease, box-shadow 0.4s ease',
+        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateY(${tilt.opacity > 0 ? '-3px' : '0px'})`,
+        transition: tilt.opacity > 0 ? 'transform 0.1s ease-out' : 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease',
         position: 'relative',
         overflow: 'hidden'
       }}
@@ -124,24 +124,26 @@ export default function ItemCard({ item, onSelect, onToggleFavorite }) {
         {/* Tags */}
         <div className="card-tags">
           {driver && (
-            <span className="apple-tag" style={{ color: 'var(--apple-blue)', borderColor: 'rgba(10, 132, 255, 0.35)', background: 'rgba(10, 132, 255, 0.08)' }} title={`Driver: ${driver}`}>
-              🏎️ {driver}
+            <span className="apple-tag" style={{ color: 'var(--apple-blue)', borderColor: 'rgba(10, 132, 255, 0.28)', background: 'rgba(10, 132, 255, 0.08)' }} title={`Driver: ${driver}`}>
+              <User size={11} strokeWidth={2.2} />
+              <span>{driver}</span>
             </span>
           )}
           {year && (
-            <span className="apple-tag" style={{ color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.35)', background: 'rgba(10, 132, 255, 0.08)' }} title={`Year / Racing Season: ${year}`}>
-              📅 {year}
+            <span className="apple-tag" style={{ color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.28)', background: 'rgba(255, 159, 10, 0.08)' }} title={`Year / Racing Season: ${year}`}>
+              <Calendar size={11} strokeWidth={2.2} />
+              <span>{year}</span>
             </span>
           )}
           {item.condition && (
             <span className="apple-tag">
-              <Tag size={11} />
-              {item.condition}
+              <Tag size={11} strokeWidth={2} />
+              <span>{item.condition}</span>
             </span>
           )}
           {item.era && (
             <span className="apple-tag" style={{ color: 'var(--apple-purple)', borderColor: 'rgba(191, 90, 242, 0.25)' }}>
-              {item.era}
+              <span>{item.era}</span>
             </span>
           )}
         </div>
@@ -149,8 +151,13 @@ export default function ItemCard({ item, onSelect, onToggleFavorite }) {
         {/* Action / Showcase Footer */}
         <div className="card-footer">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            <span style={{ fontWeight: 600, color: 'var(--apple-blue)' }}>Vault Spec</span>
-            <span>Inspect Details →</span>
+            <span style={{ fontWeight: 700, color: 'var(--apple-blue)', letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: '0.7rem' }}>
+              Vault Spec
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontWeight: 500 }}>
+              <span>Inspect</span>
+              <ArrowUpRight size={12} />
+            </span>
           </div>
         </div>
       </div>

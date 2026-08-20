@@ -216,6 +216,24 @@ export default function ItemDetailModal({
 
               {/* Inset Specs Table */}
               <div style={{ background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '0.25rem 1.15rem', boxShadow: 'var(--glass-specular)' }}>
+                {(item.driver || item.notes?.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i)?.[1]) && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Driver / Pilot</span>
+                    <span style={{ fontWeight: 600, color: 'var(--apple-blue)' }}>
+                      {item.driver || item.notes.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i)[1].trim()}
+                    </span>
+                  </div>
+                )}
+
+                {(item.year || item.notes?.match(/Year(?:\/Season)?:\s*([^\n\r|]+)/i)?.[1]) && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Year / Season</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {item.year || item.notes.match(/Year(?:\/Season)?:\s*([^\n\r|]+)/i)[1].trim()}
+                    </span>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)', fontSize: '0.875rem' }}>
                   <span style={{ color: 'var(--text-secondary)' }}>Livery / Edition</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.livery || 'Factory Original'}</span>

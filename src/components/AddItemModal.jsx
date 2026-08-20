@@ -40,6 +40,8 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
     brand: activeCategory === 'diecast' ? 'Minichamps' : 'Lego',
     scale: activeCategory === 'diecast' ? '1:64' : '1:8',
     casting_name: '',
+    driver: '',
+    year: '',
     livery: '',
     color: '',
     era: '',
@@ -59,6 +61,8 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
   const [modelPhotoUrlInput, setModelPhotoUrlInput] = useState('');
   const [trackPhotoUrlInput, setTrackPhotoUrlInput] = useState('');
   const [duplicateMatches, setDuplicateMatches] = useState([]);
+  const [isCustomBrand, setIsCustomBrand] = useState(false);
+  const [isCustomScale, setIsCustomScale] = useState(false);
   
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -66,11 +70,43 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
 
   useEffect(() => {
     if (item) {
+      const initialBrand = item.brand || (activeCategory === 'diecast' ? 'Minichamps' : 'Lego');
+      const initialScale = item.scale || (activeCategory === 'diecast' ? '1:64' : '1:8');
+      
+      const customBrandActive = initialBrand === 'Other' || !brands.includes(initialBrand);
+      const customScaleActive = initialScale === 'Other' || !scales.includes(initialScale);
+      
+      setIsCustomBrand(customBrandActive);
+      setIsCustomScale(customScaleActive);
+
+      // Extract driver & year if embedded in notes or properties
+      const extractDriver = (notes, existing) => {
+        if (existing) return existing;
+        if (!notes) return '';
+        const m = notes.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i);
+        return m ? m[1].trim() : '';
+      };
+
+      const extractYear = (notes, era, existing) => {
+        if (existing) return existing;
+        if (notes) {
+          const m = notes.match(/Year(?:\/Season)?:\s*([^\n\r|]+)/i);
+          if (m) return m[1].trim();
+        }
+        if (era) {
+          const ym = era.match(/\b(19\d\d|20\d\d)\b/);
+          if (ym) return ym[1];
+        }
+        return '';
+      };
+
       setFormData({
         category: item.category || activeCategory,
-        brand: item.brand || (activeCategory === 'diecast' ? 'Minichamps' : 'Lego'),
-        scale: item.scale || (activeCategory === 'diecast' ? '1:64' : '1:8'),
+        brand: initialBrand === 'Other' ? '' : initialBrand,
+        scale: initialScale === 'Other' ? '' : initialScale,
         casting_name: item.casting_name || '',
+        driver: extractDriver(item.notes, item.driver),
+        year: extractYear(item.notes, item.era, item.year),
         livery: item.livery || '',
         color: item.color || '',
         era: item.era || '',
@@ -193,6 +229,14 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.brand.trim()) {
+      alert('Manufacturer / Brand name is required.');
+      return;
+    }
+    if (!formData.scale.trim()) {
+      alert('Scale Ratio / Format is required.');
+      return;
+    }
     if (!formData.casting_name.trim()) {
       alert('Item / Casting Name is required.');
       return;
@@ -201,8 +245,17 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
     const finalPaid = Number(formData.purchase_price) || 0;
     const finalVal = Number(formData.current_value) || finalPaid;
 
+    let enrichedNotes = formData.notes || '';
+    if (formData.driver && !enrichedNotes.toLowerCase().includes('driver:')) {
+      enrichedNotes = `🏎️ Driver: ${formData.driver.trim()}` + (enrichedNotes ? '\n' + enrichedNotes : '');
+    }
+    if (formData.year && !enrichedNotes.toLowerCase().includes('year:')) {
+      enrichedNotes = `📅 Year: ${formData.year.trim()}` + (enrichedNotes ? '\n' + enrichedNotes : '');
+    }
+
     onSave({
       ...formData,
+      notes: enrichedNotes,
       category: activeCategory,
       purchase_price: finalPaid,
       current_value: finalVal,
@@ -481,14 +534,35 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                 <label className="form-label">Manufacturer / Brand *</label>
                 <select 
                   className="form-control"
-                  value={formData.brand}
-                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                  value={isCustomBrand ? 'Other' : (brands.includes(formData.brand) ? formData.brand : 'Other')}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'Other') {
+                      setIsCustomBrand(true);
+                      setFormData(prev => ({ ...prev, brand: '' }));
+                    } else {
+                      setIsCustomBrand(false);
+                      setFormData(prev => ({ ...prev, brand: val }));
+                    }
+                  }}
                   required
                 >
                   {brands.map(b => (
                     <option key={b} value={b}>{b}</option>
                   ))}
                 </select>
+                {isCustomBrand && (
+                  <input 
+                    type="text"
+                    className="form-control"
+                    style={{ marginTop: '0.45rem' }}
+                    placeholder="Type custom brand (e.g. Action ARC, Racing Champions, Spark...)"
+                    value={formData.brand}
+                    onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
+                    autoFocus
+                    required
+                  />
+                )}
               </div>
 
               {/* Scale / Format */}
@@ -496,14 +570,35 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                 <label className="form-label">{activeCategory === 'diecast' ? 'Scale Ratio *' : 'Format / Scale *'}</label>
                 <select 
                   className="form-control"
-                  value={formData.scale}
-                  onChange={(e) => setFormData({ ...formData, scale: e.target.value })}
+                  value={isCustomScale ? 'Other' : (scales.includes(formData.scale) ? formData.scale : 'Other')}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'Other') {
+                      setIsCustomScale(true);
+                      setFormData(prev => ({ ...prev, scale: '' }));
+                    } else {
+                      setIsCustomScale(false);
+                      setFormData(prev => ({ ...prev, scale: val }));
+                    }
+                  }}
                   required
                 >
                   {scales.map(s => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
+                {isCustomScale && (
+                  <input 
+                    type="text"
+                    className="form-control"
+                    style={{ marginTop: '0.45rem' }}
+                    placeholder="Type custom scale (e.g. 1:32, 1:87, 1:12...)"
+                    value={formData.scale}
+                    onChange={(e) => setFormData(prev => ({ ...prev, scale: e.target.value }))}
+                    autoFocus
+                    required
+                  />
+                )}
               </div>
 
               {/* Model / Casting Name */}
@@ -516,6 +611,30 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
                   value={formData.casting_name}
                   onChange={(e) => setFormData({ ...formData, casting_name: e.target.value })}
                   required
+                />
+              </div>
+
+              {/* Driver(s) / Pilot Name */}
+              <div className="form-group">
+                <label className="form-label">{activeCategory === 'diecast' ? 'Driver(s) / Pilot Name' : 'Character / Designer'}</label>
+                <input 
+                  type="text"
+                  className="form-control"
+                  placeholder={activeCategory === 'diecast' ? "e.g. Dale Earnhardt, Max Verstappen, Ayrton Senna" : "e.g. Minifigure / Creator"}
+                  value={formData.driver || ''}
+                  onChange={(e) => setFormData({ ...formData, driver: e.target.value })}
+                />
+              </div>
+
+              {/* Year / Racing Season */}
+              <div className="form-group">
+                <label className="form-label">Year / Racing Season</label>
+                <input 
+                  type="text"
+                  className="form-control"
+                  placeholder="e.g. 1998, 2023, 1982, Classic"
+                  value={formData.year || ''}
+                  onChange={(e) => setFormData({ ...formData, year: e.target.value })}
                 />
               </div>
 

@@ -48,6 +48,10 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
     return source.length > 16 ? source.slice(0, 16) + '...' : source;
   };
 
+  // Extract driver & year if present in direct properties or notes
+  const driver = item.driver || item.notes?.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i)?.[1]?.trim();
+  const year = item.year || item.notes?.match(/Year(?:\/Season)?:\s*([^\n\r|]+)/i)?.[1]?.trim() || (item.casting_name?.match(/\b(19\d\d|20\d\d)\b/)?.[1]);
+
   return (
     <div 
       ref={cardRef}
@@ -129,6 +133,16 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
 
         {/* Tags */}
         <div className="card-tags">
+          {driver && (
+            <span className="apple-tag" style={{ color: 'var(--apple-blue)', borderColor: 'rgba(10, 132, 255, 0.35)', background: 'rgba(10, 132, 255, 0.08)' }} title={`Driver: ${driver}`}>
+              🏎️ {driver}
+            </span>
+          )}
+          {year && (
+            <span className="apple-tag" style={{ color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.35)', background: 'rgba(255, 159, 10, 0.08)' }} title={`Year / Racing Season: ${year}`}>
+              📅 {year}
+            </span>
+          )}
           {item.condition && (
             <span className="apple-tag">
               <Tag size={11} />

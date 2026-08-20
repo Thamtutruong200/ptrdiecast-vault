@@ -350,8 +350,21 @@ export const api = {
 
   // Direct Cloud Update (Resilient Schema)
   async updateItem(id, itemData) {
+    const validColumns = [
+      'brand', 'scale', 'casting_name', 'livery', 'color', 'era',
+      'condition', 'purchase_price', 'current_value', 'valuation_source',
+      'notes', 'photos', 'reference_photos', 'is_favorite', 'category', 'track_photos'
+    ];
+
+    const sanitized = {};
+    for (const key of validColumns) {
+      if (itemData[key] !== undefined) {
+        sanitized[key] = itemData[key];
+      }
+    }
+
     const payload = {
-      ...itemData,
+      ...sanitized,
       updated_at: new Date().toISOString()
     };
 
@@ -396,11 +409,24 @@ export const api = {
     const supabase = getSupabase();
     if (!supabase) throw new Error('Supabase client unavailable');
 
-    const cleanItems = updatedItems.map(it => ({
-      ...it,
-      id: (it.id && it.id.includes('-') && it.id.length >= 32) ? it.id : generateUUID(),
-      updated_at: new Date().toISOString()
-    }));
+    const validColumns = [
+      'id', 'brand', 'scale', 'casting_name', 'livery', 'color', 'era',
+      'condition', 'purchase_price', 'current_value', 'valuation_source',
+      'notes', 'photos', 'reference_photos', 'is_favorite', 'category', 'track_photos',
+      'created_at', 'updated_at'
+    ];
+
+    const cleanItems = updatedItems.map(it => {
+      const sanitized = {};
+      for (const k of validColumns) {
+        if (it[k] !== undefined) sanitized[k] = it[k];
+      }
+      return {
+        ...sanitized,
+        id: (it.id && it.id.includes('-') && it.id.length >= 32) ? it.id : generateUUID(),
+        updated_at: new Date().toISOString()
+      };
+    });
 
     const { data, error } = await supabase
       .from('diecasts')

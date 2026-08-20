@@ -137,9 +137,9 @@ export default function FilterBar({
           onChange={handleSortChange}
         >
           <option value="created_at">Sort: Newest Added</option>
-          <option value="current_value">Sort: Est. Value (High to Low)</option>
-          <option value="purchase_price">Sort: Purchase Cost</option>
           <option value="casting_name">Sort: Model Name (A-Z)</option>
+          <option value="brand">Sort: Brand (A-Z)</option>
+          <option value="scale">Sort: Scale Ratio</option>
         </select>
 
         {/* Favorite Bookmark Filter */}

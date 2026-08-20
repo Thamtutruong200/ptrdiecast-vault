@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { 
-  X, Star, Edit3, Trash2, Tag, TrendingUp, HelpCircle, 
+  X, Star, Edit3, Trash2, Tag, 
   ShieldCheck, ZoomIn, ZoomOut, Flag, Image as ImageIcon, Award, Clock
 } from 'lucide-react';
-import { formatCurrency } from '../services/currency';
 import { sound } from '../services/soundEffects';
 import { BrandBadge } from '../services/brandLogos';
 import { formatRelativeOrDate, formatFullDateTime } from '../services/api';
@@ -14,11 +13,8 @@ export default function ItemDetailModal({
   onEdit, 
   onDelete, 
   onToggleFavorite, 
-  onOpenValuationInfo,
   onOpenCertificate,
-  isAdmin = true,
-  showPrices = true,
-  currency = 'VND'
+  isAdmin = true
 }) {
   if (!item) return null;
 
@@ -188,32 +184,6 @@ export default function ItemDetailModal({
 
             {/* Right: Specifications & Intelligence */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
-              {/* Purchase Price Card */}
-              {showPrices && (
-                <div 
-                  style={{ 
-                    background: 'var(--bg-surface-elevated)', 
-                    border: '1px solid rgba(52, 211, 153, 0.35)', 
-                    borderRadius: 'var(--radius-lg)', 
-                    padding: '1.15rem',
-                    boxShadow: 'var(--shadow-subtle), var(--glass-specular)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}
-                >
-                  <div>
-                    <div className="price-title">Purchase Price</div>
-                    <div className="price-amount highlight" style={{ fontSize: '1.35rem', marginTop: '0.2rem' }}>
-                      {formatCurrency(item.purchase_price, currency)}
-                    </div>
-                  </div>
-                  <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 700, background: 'rgba(52, 211, 153, 0.12)', padding: '0.3rem 0.65rem', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
-                    Authenticated Spec
-                  </span>
-                </div>
-              )}
-
               {/* Inset Specs Table */}
               <div style={{ background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '0.25rem 1.15rem', boxShadow: 'var(--glass-specular)' }}>
                 {(item.driver || item.notes?.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i)?.[1]) && (

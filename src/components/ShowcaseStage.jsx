@@ -162,24 +162,29 @@ export default function ShowcaseStage({ items, onSelectCar, onToggleFavorite, sh
               </div>
             )}
 
-            {/* Price HUD (if permitted) */}
-            {showPrices ? (
-              <div className="stage-hud-price-row">
-                <div>
-                  <div className="price-title">Purchase Price</div>
-                  <div className="price-amount highlight" style={{ fontSize: '1.25rem' }}>{formatVND(currentCar.purchase_price)}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 700, background: 'rgba(52, 211, 153, 0.12)', padding: '0.25rem 0.55rem', borderRadius: 'var(--radius-pill)', border: '1px solid rgba(52, 211, 153, 0.3)' }}>
-                    {currentCar.condition}
+            {/* Specs HUD */}
+            <div style={{ padding: '0.85rem', background: 'rgba(255, 255, 255, 0.04)', borderRadius: 'var(--radius-md)', border: 'var(--glass-border)', fontSize: '0.8125rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Condition</span>
+                <span style={{ color: 'var(--apple-amber)', fontWeight: 600 }}>{currentCar.condition}</span>
+              </div>
+              {(currentCar.driver || currentCar.notes?.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i)?.[1]) && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Driver</span>
+                  <span style={{ color: 'var(--apple-blue)', fontWeight: 600 }}>
+                    {currentCar.driver || currentCar.notes.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i)[1].trim()}
                   </span>
                 </div>
-              </div>
-            ) : (
-              <div style={{ padding: '0.85rem', background: 'rgba(255, 255, 255, 0.04)', borderRadius: 'var(--radius-md)', border: 'var(--glass-border)', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                <strong>Condition:</strong> {currentCar.condition} • <strong>Category:</strong> {currentCar.era || 'Motorsport'}
-              </div>
-            )}
+              )}
+              {(currentCar.year || currentCar.notes?.match(/Year(?:\/Season)?:\s*([^\n\r|]+)/i)?.[1]) && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Season</span>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                    {currentCar.year || currentCar.notes.match(/Year(?:\/Season)?:\s*([^\n\r|]+)/i)[1].trim()}
+                  </span>
+                </div>
+              )}
+            </div>
 
             {/* Quick Action Button */}
             <button 

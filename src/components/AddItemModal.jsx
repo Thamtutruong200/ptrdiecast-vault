@@ -678,33 +678,7 @@ export default function AddItemModal({ item, onClose, onSave, onDuplicateDetecte
             </div>
           </div>
 
-          {/* SECTION 3: PURCHASE PRICE */}
-          <div className="form-section-card">
-            <div className="form-section-title" style={{ marginBottom: '1rem' }}>
-              <DollarSign size={15} color="var(--apple-green)" />
-              <span>Purchase Price</span>
-            </div>
-
-            <div className="form-grid">
-              {/* Purchase Price */}
-              <div className="form-group col-span-2">
-                <label className="form-label">Purchase Price (VND ₫)</label>
-                <input 
-                  type="number"
-                  step="10000"
-                  className="form-control font-mono"
-                  value={formData.purchase_price || ''}
-                  placeholder="0"
-                  onChange={(e) => setFormData({ ...formData, purchase_price: Number(e.target.value) })}
-                />
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.2rem', fontWeight: 600 }}>
-                  Price: {formatVND(formData.purchase_price)}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* SECTION 4: COLLECTOR NOTES & FAVORITE */}
+          {/* SECTION 3: COLLECTOR NOTES & FAVORITE */}
           <div className="form-section-card">
             <div className="form-section-title" style={{ marginBottom: '1rem' }}>
               <FileText size={15} color="var(--apple-amber)" />

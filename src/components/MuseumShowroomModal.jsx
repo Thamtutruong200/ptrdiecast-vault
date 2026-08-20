@@ -242,9 +242,9 @@ export default function MuseumShowroomModal({ items = [], onClose, currency = 'V
               <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 700, marginTop: '0.2rem' }}>{currentItem.era || 'Modern Supercar'}</div>
             </div>
             <div>
-              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 700 }}>Purchase Price</div>
-              <div style={{ fontSize: '1.25rem', color: '#d4af37', fontWeight: 900, marginTop: '0.2rem', fontFamily: 'monospace' }}>
-                {formatCurrency(currentItem.purchase_price, currency)}
+              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', fontWeight: 700 }}>Driver / Provenance</div>
+              <div style={{ fontSize: '1rem', color: '#64d2ff', fontWeight: 700, marginTop: '0.2rem' }}>
+                {currentItem.driver || currentItem.notes?.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i)?.[1]?.trim() || currentItem.year || 'Vault Heritage'}
               </div>
             </div>
           </div>

@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { Star, Tag, TrendingUp, Sparkles } from 'lucide-react';
-import { formatCurrency } from '../services/currency';
+import { Star, Tag, Sparkles } from 'lucide-react';
 import { BrandBadge } from '../services/brandLogos';
 
-export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices = true, currency = 'VND' }) {
+export default function ItemCard({ item, onSelect, onToggleFavorite }) {
   const cardRef = useRef(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
 
@@ -37,15 +36,6 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
       return;
     }
     onSelect(item);
-  };
-
-  const getValuationSourceShort = (source) => {
-    if (!source) return 'Market Comps';
-    if (source.includes('eBay') || source.includes('Auctions')) return 'Auction Comps';
-    if (source.includes('HobbyDB') || source.includes('BrickEconomy')) return 'Index Comps';
-    if (source.includes('AI')) return 'AI Estimate';
-    if (source.includes('Appraisal')) return 'Appraised';
-    return source.length > 16 ? source.slice(0, 16) + '...' : source;
   };
 
   // Extract driver & year if present in direct properties or notes
@@ -139,7 +129,7 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
             </span>
           )}
           {year && (
-            <span className="apple-tag" style={{ color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.35)', background: 'rgba(255, 159, 10, 0.08)' }} title={`Year / Racing Season: ${year}`}>
+            <span className="apple-tag" style={{ color: 'var(--apple-amber)', borderColor: 'rgba(255, 159, 10, 0.35)', background: 'rgba(10, 132, 255, 0.08)' }} title={`Year / Racing Season: ${year}`}>
               📅 {year}
             </span>
           )}
@@ -156,19 +146,12 @@ export default function ItemCard({ item, onSelect, onToggleFavorite, showPrices 
           )}
         </div>
 
-        {/* Financial Footer (or Showcase Footer in Spectator Mode) */}
+        {/* Action / Showcase Footer */}
         <div className="card-footer">
-          {showPrices ? (
-            <div className="price-unit" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <span className="price-title">Price</span>
-              <span className="price-amount highlight">{formatCurrency(item.purchase_price, currency)}</span>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-              <span style={{ fontWeight: 600, color: 'var(--apple-blue)' }}>Showcase Spec</span>
-              <span>Inspect Details →</span>
-            </div>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+            <span style={{ fontWeight: 600, color: 'var(--apple-blue)' }}>Vault Spec</span>
+            <span>Inspect Details →</span>
+          </div>
         </div>
       </div>
     </div>

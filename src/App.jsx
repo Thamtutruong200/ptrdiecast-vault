@@ -426,8 +426,6 @@ export default function App() {
                 onDelete={handleDeleteItem}
                 onToggleFavorite={handleToggleFavorite}
                 isAdmin={isAdmin}
-                showPrices={showPrices}
-                currency={currency}
               />
             ) : (
               /* View 2: 4 Cars Per Row Liquid Glass Gallery Grid with 3D Physics */
@@ -441,8 +439,6 @@ export default function App() {
                       setSelectedItem(it);
                     }}
                     onToggleFavorite={handleToggleFavorite}
-                    showPrices={showPrices}
-                    currency={currency}
                   />
                 ))}
               </div>
@@ -532,14 +528,11 @@ export default function App() {
               }}
               onDelete={handleDeleteItem}
               onToggleFavorite={handleToggleFavorite}
-              onOpenValuationInfo={() => setIsValuationInfoOpen(true)}
               onOpenCertificate={(it) => {
                 sound.playStar();
                 setCertificateItem(it);
               }}
               isAdmin={isAdmin}
-              showPrices={showPrices}
-              currency={currency}
             />
           )}
 

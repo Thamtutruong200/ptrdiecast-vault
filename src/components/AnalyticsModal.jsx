@@ -1,23 +1,28 @@
 import React from 'react';
-import { X, PieChart, TrendingUp, CircleDollarSign, Award, Layers, Sparkles, ArrowUpRight } from 'lucide-react';
-import { formatVND } from '../services/api';
+import { X, PieChart, Layers, Star, Award, Compass } from 'lucide-react';
 
 export default function AnalyticsModal({ stats, items = [], onClose, onSelectCar }) {
   if (!stats) return null;
 
-  const totalPaid = stats.total_paid || 0;
+  const totalCount = stats.total_count || items.length || 0;
 
-  // Calculate brand distribution by purchase spending
-  const brandValues = {};
+  // Calculate brand distribution by count
+  const brandCounts = {};
   items.forEach(it => {
     const brand = it.brand || 'Other';
-    brandValues[brand] = (brandValues[brand] || 0) + (it.purchase_price || 0);
+    brandCounts[brand] = (brandCounts[brand] || 0) + 1;
   });
 
-  const sortedBrands = Object.entries(brandValues).sort((a, b) => b[1] - a[1]);
+  const sortedBrands = Object.entries(brandCounts).sort((a, b) => b[1] - a[1]);
 
-  // Top 3 most premium models
-  const topValuedCars = [...items].sort((a, b) => (b.purchase_price || 0) - (a.purchase_price || 0)).slice(0, 3);
+  // Calculate scale distribution by count
+  const scaleCounts = {};
+  items.forEach(it => {
+    const scale = it.scale || '1:64';
+    scaleCounts[scale] = (scaleCounts[scale] || 0) + 1;
+  });
+
+  const sortedScales = Object.entries(scaleCounts).sort((a, b) => b[1] - a[1]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -45,7 +50,7 @@ export default function AnalyticsModal({ stats, items = [], onClose, onSelectCar
                 Collection Analytics
               </div>
               <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary)', fontWeight: 700 }}>
-                Vault Portfolio & Spending Overview
+                Vault Distribution & Maker Overview
               </h2>
             </div>
           </div>
@@ -59,47 +64,47 @@ export default function AnalyticsModal({ stats, items = [], onClose, onSelectCar
           {/* Top KPI Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
             <div className="stat-card">
-              <div className="price-title">Total Collection Cost</div>
-              <div className="price-amount highlight" style={{ fontSize: '1.45rem', marginTop: '0.25rem' }}>
-                {formatVND(totalPaid)}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.35rem' }}>
-                Across {stats.total_count || 0} authenticated models
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="price-title">Total Vault Items</div>
+              <div className="price-title">Total Vault Models</div>
               <div className="price-amount" style={{ fontSize: '1.45rem', marginTop: '0.25rem', color: 'var(--apple-blue)' }}>
-                {stats.total_count || 0} Models
+                {totalCount} Items
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.35rem' }}>
-                {stats.favorites_count || 0} starred favorites
+                Authenticated collection
               </div>
             </div>
 
             <div className="stat-card">
-              <div className="price-title">Average Cost / Unit</div>
-              <div className="price-amount" style={{ fontSize: '1.45rem', marginTop: '0.25rem' }}>
-                {formatVND(stats.total_count ? totalPaid / stats.total_count : 0)}
+              <div className="price-title">Starred Favorites</div>
+              <div className="price-amount" style={{ fontSize: '1.45rem', marginTop: '0.25rem', color: 'var(--apple-amber)' }}>
+                {stats.favorites_count || 0} Models
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.35rem' }}>
-                Average per model
+                {totalCount > 0 ? `${(((stats.favorites_count || 0) / totalCount) * 100).toFixed(0)}% of collection` : '0%'}
+              </div>
+            </div>
+
+            <div className="stat-card">
+              <div className="price-title">Active Makers</div>
+              <div className="price-amount" style={{ fontSize: '1.45rem', marginTop: '0.25rem', color: 'var(--apple-purple)' }}>
+                {sortedBrands.length} Brands
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.35rem' }}>
+                Across diverse scales
               </div>
             </div>
           </div>
 
-          {/* Capital Allocation by Brand */}
+          {/* Collection Distribution by Brand */}
           <div style={{ background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '1.25rem' }}>
             <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.85rem' }}>
-              Investment by Manufacturer
+              Models by Manufacturer
             </h3>
 
             {/* Visual Multi-Segment Bar */}
             <div style={{ height: '14px', borderRadius: 'var(--radius-pill)', overflow: 'hidden', display: 'flex', gap: '2px', marginBottom: '1rem', background: 'rgba(255, 255, 255, 0.08)' }}>
-              {sortedBrands.map(([brand, val], idx) => {
-                const pct = totalPaid > 0 ? (val / totalPaid) * 100 : 0;
-                const colors = ['#0a84ff', '#ffd60a', '#30d158', '#ff453a', '#bf5af2', '#ff9f0a'];
+              {sortedBrands.map(([brand, count], idx) => {
+                const pct = totalCount > 0 ? (count / totalCount) * 100 : 0;
+                const colors = ['#0a84ff', '#ffd60a', '#30d158', '#ff453a', '#bf5af2', '#ff9f0a', '#64d2ff'];
                 return (
                   <div 
                     key={brand}
@@ -108,7 +113,7 @@ export default function AnalyticsModal({ stats, items = [], onClose, onSelectCar
                       background: colors[idx % colors.length],
                       borderRadius: '2px'
                     }}
-                    title={`${brand}: ${formatVND(val)} (${pct.toFixed(1)}%)`}
+                    title={`${brand}: ${count} models (${pct.toFixed(1)}%)`}
                   />
                 );
               })}
@@ -116,9 +121,9 @@ export default function AnalyticsModal({ stats, items = [], onClose, onSelectCar
 
             {/* Brand Breakdown List */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
-              {sortedBrands.map(([brand, val], idx) => {
-                const pct = totalPaid > 0 ? ((val / totalPaid) * 100).toFixed(1) : 0;
-                const colors = ['#0a84ff', '#ffd60a', '#30d158', '#ff453a', '#bf5af2', '#ff9f0a'];
+              {sortedBrands.map(([brand, count], idx) => {
+                const pct = totalCount > 0 ? ((count / totalCount) * 100).toFixed(1) : 0;
+                const colors = ['#0a84ff', '#ffd60a', '#30d158', '#ff453a', '#bf5af2', '#ff9f0a', '#64d2ff'];
                 return (
                   <div key={brand} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8125rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
@@ -126,7 +131,7 @@ export default function AnalyticsModal({ stats, items = [], onClose, onSelectCar
                       <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{brand}</span>
                     </div>
                     <span style={{ color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
-                      {formatVND(val)} <strong style={{ color: colors[idx % colors.length] }}>({pct}%)</strong>
+                      {count} models <strong style={{ color: colors[idx % colors.length] }}>({pct}%)</strong>
                     </span>
                   </div>
                 );
@@ -134,42 +139,24 @@ export default function AnalyticsModal({ stats, items = [], onClose, onSelectCar
             </div>
           </div>
 
-          {/* Top 3 Premium Holdings */}
-          {topValuedCars.length > 0 && (
-            <div>
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
-                Top Flagship Holdings in Vault
-              </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.85rem' }}>
-                {topValuedCars.map((car, idx) => (
-                  <div 
-                    key={car.id}
-                    className="stat-card"
-                    onClick={() => {
-                      onClose();
-                      onSelectCar(car);
-                    }}
-                    style={{ cursor: 'pointer', padding: '1rem' }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--apple-amber)' }}>
-                        #{idx + 1} Flagship
-                      </span>
-                      <span className="scale-pill-badge" style={{ position: 'static', padding: '0.1rem 0.4rem', fontSize: '0.65rem' }}>
-                        {car.scale}
-                      </span>
-                    </div>
-                    <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem', margin: '0.35rem 0' }}>
-                      {car.brand} {car.casting_name}
-                    </div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#34d399' }}>
-                      {formatVND(car.purchase_price)}
-                    </div>
+          {/* Scale Ratio Breakdown */}
+          <div style={{ background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '1.25rem' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.85rem' }}>
+              Scale Ratio Breakdown
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+              {sortedScales.map(([scale, count]) => (
+                <div key={scale} className="stat-card" style={{ padding: '0.85rem' }}>
+                  <span className="scale-pill-badge" style={{ position: 'static', padding: '0.15rem 0.5rem', fontSize: '0.7rem' }}>
+                    {scale}
+                  </span>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.4rem' }}>
+                    {count} <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontWeight: 400 }}>models</span>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
 
           {/* Close button */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '0.5rem' }}>

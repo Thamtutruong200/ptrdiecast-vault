@@ -1,10 +1,9 @@
 import React from 'react';
 import { Star, Eye, Edit3, Trash2 } from 'lucide-react';
-import { formatCurrency } from '../services/currency';
 import { sound } from '../services/soundEffects';
 import { BrandBadge } from '../services/brandLogos';
 
-export default function ItemListView({ items, onSelect, onEdit, onDelete, onToggleFavorite, isAdmin = true, showPrices = true, currency = 'VND' }) {
+export default function ItemListView({ items, onSelect, onEdit, onDelete, onToggleFavorite, isAdmin = true }) {
   if (!items || items.length === 0) return null;
 
   return (
@@ -14,14 +13,13 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
           <tr>
             <th style={{ width: '44px', textAlign: 'center' }}>Fav</th>
             <th style={{ width: '56px', textAlign: 'center' }}>Photo</th>
-            <th style={{ minWidth: '220px' }}>Model & Casting Name</th>
-            <th style={{ width: '160px' }}>Brand / Maker</th>
-            <th style={{ width: '90px', textAlign: 'center' }}>Scale / Type</th>
-            <th style={{ minWidth: '160px' }}>Livery / Edition</th>
-            <th style={{ width: '130px' }}>Condition</th>
-            {showPrices && (
-              <th style={{ width: '130px', textAlign: 'right' }}>Price</th>
-            )}
+            <th style={{ minWidth: '200px' }}>Model & Casting Name</th>
+            <th style={{ width: '150px' }}>Brand / Maker</th>
+            <th style={{ width: '85px', textAlign: 'center' }}>Scale</th>
+            <th style={{ width: '140px' }}>Driver / Pilot</th>
+            <th style={{ width: '90px', textAlign: 'center' }}>Year</th>
+            <th style={{ minWidth: '140px' }}>Livery / Edition</th>
+            <th style={{ width: '120px' }}>Condition</th>
             <th style={{ width: isAdmin ? '100px' : '60px', textAlign: 'center' }}>Actions</th>
           </tr>
         </thead>
@@ -30,6 +28,9 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
             const photo = (item.photos && item.photos.length > 0)
               ? item.photos[0]
               : 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=120&q=80';
+
+            const driver = item.driver || item.notes?.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i)?.[1]?.trim() || '—';
+            const year = item.year || item.notes?.match(/Year(?:\/Season)?:\s*([^\n\r|]+)/i)?.[1]?.trim() || (item.casting_name?.match(/\b(19\d\d|20\d\d)\b/)?.[1]) || '—';
 
             return (
               <tr key={item.id || idx} onClick={() => onSelect(item)} className="list-view-row">
@@ -74,6 +75,20 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
                   </span>
                 </td>
 
+                {/* Driver */}
+                <td>
+                  <span style={{ fontSize: '0.8125rem', color: driver !== '—' ? 'var(--apple-blue)' : 'var(--text-tertiary)', fontWeight: driver !== '—' ? 600 : 400 }}>
+                    {driver}
+                  </span>
+                </td>
+
+                {/* Year */}
+                <td style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.8125rem', color: year !== '—' ? 'var(--apple-amber)' : 'var(--text-tertiary)', fontWeight: year !== '—' ? 600 : 400 }}>
+                    {year}
+                  </span>
+                </td>
+
                 {/* Livery / Edition */}
                 <td>
                   <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
@@ -87,13 +102,6 @@ export default function ItemListView({ items, onSelect, onEdit, onDelete, onTogg
                     {item.condition}
                   </span>
                 </td>
-
-                {/* Price */}
-                {showPrices && (
-                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 700, fontSize: '0.875rem', color: '#34d399' }}>
-                    {formatCurrency(item.purchase_price, currency)}
-                  </td>
-                )}
 
                 {/* Quick Actions */}
                 <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>

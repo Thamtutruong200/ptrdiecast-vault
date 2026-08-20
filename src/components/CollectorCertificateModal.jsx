@@ -173,9 +173,9 @@ export default function CollectorCertificateModal({ item, onClose, currency = 'V
                 <div style={{ fontSize: '0.85rem', color: '#f5f5f7', fontWeight: 700, marginTop: '0.15rem' }}>{item.era || 'Modern Supercar'}</div>
               </div>
               <div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Purchase Price</div>
-                <div style={{ fontSize: '0.95rem', color: '#d4af37', fontWeight: 800, marginTop: '0.15rem', fontFamily: 'monospace' }}>
-                  {formatCurrency(item.purchase_price, currency)}
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 700 }}>Driver / Season</div>
+                <div style={{ fontSize: '0.85rem', color: '#d4af37', fontWeight: 800, marginTop: '0.15rem' }}>
+                  {item.driver || item.notes?.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i)?.[1]?.trim() || item.year || 'Authenticated Spec'}
                 </div>
               </div>
             </div>

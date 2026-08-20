@@ -331,32 +331,15 @@ export default function AdminConsoleModal({
             </div>
           </div>
 
-          {/* Privacy & Spectator Mode Settings */}
+          {/* Access Control */}
           <div style={{ background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-lg)', border: 'var(--glass-border)', padding: '1.15rem' }}>
             <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.65rem' }}>
-              Spectator Console Privacy Controls
+              Vault Access Control
             </h3>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.65rem 0', borderBottom: '1px solid var(--glass-border)', gap: '0.5rem' }}>
-              <div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Hide Paid Costs & Valuations in Spectator Mode
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                  When enabled, visitors only see your collection as a museum showroom without sensitive purchase prices.
-                </div>
-              </div>
-              <input 
-                type="checkbox"
-                checked={hidePrices}
-                onChange={handleToggleHidePrices}
-                style={{ width: 20, height: 20, cursor: 'pointer', accentColor: 'var(--apple-blue)', flexShrink: 0 }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                Active Mode: <strong>Admin (Unlocked)</strong>
+                Active Mode: <strong style={{ color: '#34d399' }}>Admin (Full Control)</strong>
               </span>
               <button 
                 type="button" 

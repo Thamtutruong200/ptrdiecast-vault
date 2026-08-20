@@ -252,7 +252,7 @@ export default function ExcelSheetModal({ items, onClose, onRefresh, activeCateg
                 <th style={{ minWidth: '180px' }}>Livery / Edition</th>
                 <th style={{ minWidth: '150px' }}>Era / Series</th>
                 <th style={{ minWidth: '150px' }}>Condition</th>
-                <th style={{ minWidth: '140px', textAlign: 'right' }}>Price (VND)</th>
+                <th style={{ minWidth: '160px' }}>Driver / Pilot</th>
                 <th style={{ minWidth: '260px' }}>Collector Notes</th>
                 <th style={{ width: '80px', textAlign: 'center' }}>Actions</th>
               </tr>
@@ -343,14 +343,14 @@ export default function ExcelSheetModal({ items, onClose, onRefresh, activeCateg
                     </select>
                   </td>
 
-                  {/* Purchase Price */}
+                  {/* Driver / Pilot */}
                   <td>
                     <input 
-                      type="number"
-                      className="excel-cell-input font-mono font-bold"
-                      style={{ textAlign: 'right', color: '#34d399' }}
-                      value={row.purchase_price || 0}
-                      onChange={(e) => handleCellChange(index, 'purchase_price', e.target.value)}
+                      type="text"
+                      className="excel-cell-input"
+                      value={row.driver || row.notes?.match(/Driver(?:\(s\))?:\s*([^\n\r|]+)/i)?.[1]?.trim() || ''}
+                      onChange={(e) => handleCellChange(index, 'driver', e.target.value)}
+                      placeholder="e.g. Dale Earnhardt"
                     />
                   </td>
 
